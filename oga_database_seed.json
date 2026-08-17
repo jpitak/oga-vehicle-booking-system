@@ -1,0 +1,71 @@
+{
+  "system": "OGA Fleet Management System",
+  "version": "2.5.0",
+  "exportedAt": "2026-08-15T00:00:00.000Z",
+  "users": [
+    {
+      "id": "u-1",
+      "employeeId": "OGA-1001",
+      "name": "สมชาย ใจดี",
+      "department": "ฝ่ายสนับสนุน",
+      "role": "admin",
+      "roleLabel": "ผู้ดูแลระบบ",
+      "avatar": "ส",
+      "email": "somchai.j@ogainternational.com",
+      "phone": "081-234-5678"
+    },
+    {
+      "id": "u-2",
+      "employeeId": "OGA-1002",
+      "name": "วิภา สุขสม",
+      "department": "ฝ่ายสนับสนุน",
+      "role": "manager",
+      "roleLabel": "ผู้อนุมัติขั้น 1 (หัวหน้าแผนก)",
+      "avatar": "ว",
+      "email": "wipha.s@ogainternational.com",
+      "phone": "082-345-6789"
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "v-1",
+      "name": "Toyota Hilux Revo Double Cab",
+      "type": "กระบะ 4 ประตู",
+      "plate": "กข 1234 กทม.",
+      "status": "available",
+      "mileage": 45200
+    },
+    {
+      "id": "v-2",
+      "name": "Toyota Fortuner 2.8 Legender",
+      "type": "SUV 7 ที่นั่ง",
+      "plate": "ขค 5678 กทม.",
+      "status": "in_use",
+      "mileage": 32800
+    },
+    {
+      "id": "v-3",
+      "name": "Toyota Commuter VIP High Roof",
+      "type": "รถตู้ 10 ที่นั่ง",
+      "plate": "งจ 9012 กทม.",
+      "status": "available",
+      "mileage": 78900
+    },
+    {
+      "id": "v-4",
+      "name": "Toyota Camry 2.5 HEV Premium Luxury",
+      "type": "เก๋งซีดาน Hybrid",
+      "plate": "ฉช 3344 กทม.",
+      "status": "available",
+      "mileage": 21500
+    },
+    {
+      "id": "v-5",
+      "name": "Isuzu D-Max Spacecab Hi-Lander",
+      "type": "กระบะตอนครึ่ง",
+      "plate": "ญฎ 7890 ชลบุรี",
+      "status": "available",
+      "mileage": 96400
+    }
+  ]
+}
