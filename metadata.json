@@ -1,0 +1,6 @@
+{
+  "name": "OGA Vehicle Booking System",
+  "description": "ระบบการจองรถออนไลน์และบริหารจัดการยานพาหนะสำหรับ OGA International พร้อมระบบติดตาม GPS แจ้งเตือน Line Notify และระบบ 3D Themes 12 รูปแบบ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
