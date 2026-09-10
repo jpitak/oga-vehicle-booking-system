@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>OGA Fleet v3.2 - ระบบจองยานพาหนะ OGA International</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  /* Primary & Accent — Color Palette Guide */
+  --primary:#0A6B89; --primary-light:#1380A1; --accent:#FF8C00; --accent-dark:#F57C00;
+  /* Background & Base */
+  --bg:#F4F7F9; --bg-alt:#EBF0F5; --card:#FFFFFF; --border:#E2E8F0;
+  /* Text */
+  --text:#1A202C; --text-secondary:#718096;
+  /* Status / Risk heatmap */
+  --success:#2BB673; --warning:#FFB300; --danger:#E53E3E; --critical:#D53F8C;
+  --risk-low:#2BB673; --risk-mod:#FFB300; --risk-high:#FF6B00; --risk-extreme:#E53E3E;
+  --sidebar:#0A6B89; --sidebar-text:#E2F4F8; --radius:14px;
+  --shadow:0 2px 8px rgba(0,0,0,0.04); --shadow-lg:0 12px 40px rgba(10,107,137,0.14);
+  --glass:rgba(255,255,255,0.75); --plate-a:#0A6B89; --plate-b:#D97706;
+}
+[data-theme="crimson"]{--primary:#C53030;--primary-light:#E53E3E;--accent:#F6AD55;--sidebar:#742A2A;--bg:#FFF5F5;--plate-a:#C53030;--plate-b:#DD6B20}
+[data-theme="cyberpunk"]{--primary:#00D4FF;--primary-light:#00F0FF;--accent:#FF00AA;--sidebar:#0A0A1A;--bg:#0D1117;--card:#161B22;--text:#E6EDF3;--text-secondary:#8B949E;--border:#30363D;--sidebar-text:#00D4FF;--plate-a:#00D4FF;--plate-b:#FF00AA}
+[data-theme="emerald"]{--primary:#047857;--primary-light:#059669;--accent:#F59E0B;--sidebar:#064E3B;--bg:#ECFDF5;--plate-a:#047857;--plate-b:#D97706}
+[data-theme="sunset"]{--primary:#DD6B20;--primary-light:#ED8936;--accent:#D69E2E;--sidebar:#7B341E;--bg:#FFFAF0;--plate-a:#DD6B20;--plate-b:#C53030}
+[data-theme="ocean"]{--primary:#2B6CB0;--primary-light:#3182CE;--accent:#38B2AC;--sidebar:#1A365D;--bg:#EBF8FF;--plate-a:#2B6CB0;--plate-b:#319795}
+[data-theme="violet"]{--primary:#6B46C1;--primary-light:#805AD5;--accent:#ED64A6;--sidebar:#44337A;--bg:#FAF5FF;--plate-a:#6B46C1;--plate-b:#D53F8C}
+[data-theme="slate"]{--primary:#334155;--primary-light:#475569;--accent:#F59E0B;--sidebar:#0F172A;--bg:#F8FAFC;--plate-a:#334155;--plate-b:#F59E0B}
+[data-theme="rose"]{--primary:#BE185D;--primary-light:#DB2777;--accent:#F97316;--sidebar:#831843;--bg:#FFF1F2;--plate-a:#BE185D;--plate-b:#EA580C}
+[data-theme="forest"]{--primary:#166534;--primary-light:#16A34A;--accent:#CA8A04;--sidebar:#14532D;--bg:#F0FDF4;--plate-a:#166534;--plate-b:#A16207}
+[data-theme="midnight"]{--primary:#1E3A5F;--primary-light:#2C5282;--accent:#F6AD55;--sidebar:#0B1526;--bg:#0F172A;--card:#1E293B;--text:#F1F5F9;--text-secondary:#94A3B8;--border:#334155;--sidebar-text:#93C5FD;--plate-a:#3B82F6;--plate-b:#F6AD55}
+[data-theme="gold"]{--primary:#B45309;--primary-light:#D97706;--accent:#FBBF24;--sidebar:#78350F;--bg:#FFFBEB;--plate-a:#B45309;--plate-b:#CA8A04}
+[data-theme="neon"]{--primary:#10B981;--primary-light:#34D399;--accent:#F472B6;--sidebar:#064E3B;--bg:#022C22;--card:#064E3B;--text:#ECFDF5;--text-secondary:#6EE7B7;--border:#065F46;--sidebar-text:#6EE7B7;--plate-a:#10B981;--plate-b:#F472B6}
+[data-theme="coral"]{--primary:#E11D48;--primary-light:#FB7185;--accent:#F97316;--sidebar:#9F1239;--bg:#FFF1F2;--plate-a:#E11D48;--plate-b:#EA580C}
+[data-theme="indigo"]{--primary:#4338CA;--primary-light:#6366F1;--accent:#14B8A6;--sidebar:#312E81;--bg:#EEF2FF;--plate-a:#4338CA;--plate-b:#0D9488}
+[data-theme="amber"]{--primary:#D97706;--primary-light:#F59E0B;--accent:#3B82F6;--sidebar:#92400E;--bg:#FFFBEB;--plate-a:#D97706;--plate-b:#2563EB}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans Thai','Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow:hidden;transition:background .3s,color .3s}
+button,input,select,textarea{font-family:inherit}
+.sidebar{width:250px;background:linear-gradient(180deg,var(--sidebar) 0%,color-mix(in srgb,var(--sidebar) 82%,#000) 100%);color:var(--sidebar-text);display:flex;flex-direction:column;flex-shrink:0;height:100vh;z-index:30;box-shadow:6px 0 28px rgba(0,0,0,.15)}
+.sidebar-brand{padding:18px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sidebar-brand .logo{width:42px;height:42px;background:linear-gradient(145deg,var(--accent),var(--accent-dark));border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;box-shadow:0 6px 16px rgba(255,140,0,.45), inset 0 1px 0 rgba(255,255,255,.3);transform:perspective(220px) rotateY(-10deg)}
+.sidebar-brand .brand-text strong{display:block;font-size:15px;color:#fff}
+.sidebar-brand .brand-text span{font-size:11px;opacity:.75}
+.sidebar-brand .badge{background:var(--accent);color:#000;font-size:9px;font-weight:700;padding:3px 7px;border-radius:6px;margin-left:auto;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.nav{flex:1;overflow-y:auto;padding:12px 10px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:12px;color:rgba(255,255,255,.72);cursor:pointer;font-size:13.5px;font-weight:500;margin-bottom:3px;transition:.2s;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-item.active{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#000;font-weight:700;box-shadow:0 4px 16px rgba(255,140,0,.4)}
+.nav-item .icon{width:22px;text-align:center;font-size:17px}
+.nav-item .badge-count{position:absolute;right:12px;background:#E53E3E;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;box-shadow:0 2px 6px rgba(229,62,62,.4)}
+.sidebar-footer{padding:14px;border-top:1px solid rgba(255,255,255,.1)}
+.gs-status{background:rgba(43,182,115,.22);color:#6EE7B7;font-size:11px;padding:9px 12px;border-radius:10px;display:flex;align-items:center;gap:7px;margin-bottom:8px;border:1px solid rgba(43,182,115,.35)}
+.gs-status.offline{background:rgba(229,62,62,.18);color:#FEB2B2;border-color:rgba(229,62,62,.35)}
+.version{font-size:11px;opacity:.6;text-align:center}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:60px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;box-shadow:0 2px 12px rgba(0,0,0,.04);z-index:10}
+.topbar h1{font-size:18px;font-weight:700;flex:1}
+.topbar .actions{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn-primary{background:linear-gradient(145deg,var(--accent),var(--accent-dark));color:#fff;box-shadow:0 4px 14px rgba(255,140,0,.35), inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,140,0,.45)}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.btn-secondary:hover{background:var(--bg-alt)}
+.btn-success{background:linear-gradient(145deg,var(--success),#38C172);color:#fff;box-shadow:0 3px 10px rgba(43,182,115,.3)}
+.btn-danger{background:linear-gradient(145deg,var(--danger),#C53030);color:#fff;box-shadow:0 3px 10px rgba(229,62,62,.3)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
+
+.content{flex:1;overflow-y:auto;padding:22px 24px;background:var(--bg)}
+.page{display:none}.page.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:22px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;overflow:hidden;transition:.25s;cursor:pointer}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.stat-card .label{font-size:12px;color:var(--text-secondary);font-weight:500;margin-bottom:6px}
+.stat-card .value{font-size:28px;font-weight:800;line-height:1.1;color:var(--text)}
+.stat-card .sub{font-size:11px;color:var(--text-secondary);margin-top:4px}
+.stat-card .icon-bg{position:absolute;right:14px;top:14px;font-size:28px;opacity:.15}
+.dash-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:18px}
+@media(max-width:1000px){.dash-grid{grid-template-columns:1fr}}
+.chart-bars{display:flex;align-items:flex-end;gap:10px;height:160px;padding:8px 4px 0}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.chart-bar{width:100%;max-width:36px;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,var(--primary-light),var(--primary));box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 30%,transparent);transition:.3s;min-height:4px}
+.chart-bar:hover{filter:brightness(1.08);transform:scaleY(1.03)}
+.chart-bar-label{font-size:10px;color:var(--text-secondary);margin-top:6px;text-align:center}
+.chart-bar-val{font-size:10px;font-weight:700;color:var(--text);margin-bottom:4px}
+.donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.donut{width:130px;height:130px;border-radius:50%;position:relative}
+.donut-center{position:absolute;inset:28px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.donut-center strong{font-size:22px;font-weight:800}
+.donut-center span{font-size:10px;color:var(--text-secondary)}
+.legend-list{display:flex;flex-direction:column;gap:8px;font-size:12px}
+.legend-list .row{display:flex;align-items:center;gap:8px}
+.legend-list .sw{width:12px;height:12px;border-radius:4px}
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+.quick-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.quick-card:hover{border-color:var(--primary-light);transform:translateY(-2px);box-shadow:var(--shadow)}
+.quick-card .qi{font-size:28px;margin-bottom:8px}
+.quick-card .qt{font-size:13px;font-weight:700;color:var(--text)}
+.quick-card .qs{font-size:11px;color:var(--text-secondary);margin-top:2px}
+
+
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-header h3{font-size:15px;font-weight:700}
+.card-body{padding:16px 18px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:color-mix(in srgb,var(--primary) 8%,var(--card));color:var(--text);font-weight:600;text-align:left;padding:11px 14px;border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:color-mix(in srgb,var(--primary) 4%,transparent)}
+
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.badge-success{background:#F0FFF4;color:#276749}.badge-warning{background:#FFFAF0;color:#C05621}
+.badge-danger{background:#FFF5F5;color:#C53030}.badge-info{background:#EBF8FF;color:#2B6CB0}.badge-muted{background:#EDF2F7;color:#4A5568}
+
+.plate-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-weight:800;font-size:12.5px;color:#fff;letter-spacing:.3px;box-shadow:0 2px 8px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.25)}
+
+.vehicle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.vehicle-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:.25s;cursor:pointer}
+.vehicle-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.vehicle-card .img{height:130px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative}
+.vehicle-card .body{padding:14px 16px}
+.vehicle-card .plate{font-weight:800;font-size:16px}
+.vehicle-card .meta{font-size:12px;color:var(--text-secondary);margin-top:4px}
+.vehicle-card .actions{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+
+.cal-nav{display:flex;gap:8px;align-items:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-day-name{text-align:center;font-size:12px;font-weight:600;color:var(--text-secondary);padding:8px 0}
+.cal-cell{min-height:92px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;font-size:12px}
+.cal-cell.other{opacity:.4}.cal-cell.today{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.cal-cell .day-num{font-weight:700;margin-bottom:4px;font-size:13px}
+.cal-chip{font-size:10px;padding:5px 7px;border-radius:8px;margin-bottom:4px;color:#1a1a1a;font-weight:600;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.1);border-left:3px solid;background:#fff;line-height:1.35}
+.cal-chip .chip-plate{font-weight:800;font-size:11px}
+.cal-chip .chip-meta{font-size:9.5px;color:#555;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-legend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.cal-legend .lg{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--border)}
+.cal-legend .dot{width:10px;height:10px;border-radius:50%}
+.cal-cell{min-height:110px}
+.cal-day-name{text-align:center;font-size:12px;font-weight:600;color:var(--text-secondary);padding:8px 0}
+
+
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:18px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.28);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(12px)}to{opacity:1;transform:none}}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-size:17px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--bg);cursor:pointer;font-size:18px}
+.modal-body{padding:20px 22px}.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12.5px;font-weight:600;color:var(--text-secondary);margin-bottom:5px}
+.form-control{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:10px;font-size:13.5px;background:var(--card);color:var(--text);transition:.15s}
+.form-control:focus{outline:none;border-color:var(--primary-light);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 18%,transparent)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input[type="date"].form-control{min-height:42px}
+
+.loading-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:14px}
+.loading-overlay.show{display:flex}
+.spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.25);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:#fff;font-weight:600;font-size:15px}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;box-shadow:var(--shadow-lg);z-index:300;display:none;align-items:center;gap:10px;min-width:280px;animation:slideUp .3s ease}
+.toast.show{display:flex}.toast.success{border-left:4px solid var(--success)}.toast.error{border-left:4px solid var(--danger)}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+.theme-picker{display:flex;flex-wrap:wrap;gap:10px}
+.theme-swatch{width:40px;height:40px;border-radius:12px;cursor:pointer;border:3px solid transparent;transition:.2s;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+.theme-swatch:hover,.theme-swatch.active{border-color:var(--accent);transform:scale(1.12)}
+.theme-swatch span{display:none}
+
+.wizard-steps{display:flex;gap:8px;margin-bottom:20px}
+.wizard-step{flex:1;text-align:center;padding:10px;border-radius:10px;background:var(--bg);font-size:12px;font-weight:600;color:var(--text-secondary);border:2px solid transparent}
+.wizard-step.active{background:color-mix(in srgb,var(--primary) 12%,var(--card));color:var(--primary);border-color:var(--primary)}
+.wizard-step.done{background:color-mix(in srgb,var(--success) 12%,var(--card));color:var(--success)}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text-secondary)}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.5}
+@media(max-width:900px){.sidebar{width:68px}.sidebar-brand .brand-text,.nav-item span:not(.icon),.sidebar-footer .version{display:none}.nav-item{justify-content:center;padding:12px}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">OGA</div>
+    <div class="brand-text"><strong>OGA Fleet</strong><span>Vehicle Booking</span></div>
+    <span class="badge">v3.2</span>
+  </div>
+  <nav class="nav" id="mainNav">
+    <div class="nav-item active" data-page="dashboard"><span class="icon">📊</span><span>แดชบอร์ด</span></div>
+    <div class="nav-item" data-page="booking"><span class="icon">🚗</span><span>จองรถ</span></div>
+    <div class="nav-item" data-page="calendar"><span class="icon">📅</span><span>ปฏิทิน</span></div>
+    <div class="nav-item" data-page="approvals"><span class="icon">✅</span><span>อนุมัติ</span><span class="badge-count" id="approveBadge" style="display:none">0</span></div>
+    <div class="nav-item" data-page="returns"><span class="icon">↩️</span><span>คืนรถ</span></div>
+    <div class="nav-item" data-page="vehicles"><span class="icon">🚙</span><span>ยานพาหนะ</span></div>
+    <div class="nav-item" data-page="drivers"><span class="icon">👤</span><span>คนขับรถ</span></div>
+    <div class="nav-item" data-page="users"><span class="icon">👥</span><span>ผู้ใช้งาน</span></div>
+    <div class="nav-item" data-page="departments"><span class="icon">🏢</span><span>แผนก</span></div>
+    <div class="nav-item" data-page="maintenance"><span class="icon">🔧</span><span>บำรุงรักษา</span></div>
+    <div class="nav-item" data-page="reports"><span class="icon">📈</span><span>รายงาน</span></div>
+    <div class="nav-item" data-page="gps"><span class="icon">📍</span><span>GPS / Telematics</span></div>
+    <div class="nav-item" data-page="google"><span class="icon">📑</span><span>Google Sheet & Script</span></div>
+    <div class="nav-item" data-page="settings"><span class="icon">⚙️</span><span>ตั้งค่า / ธีม</span></div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="gs-status offline" id="gsStatus"><span>●</span> <span id="gsStatusText">ยังไม่เชื่อมต่อ</span></div>
+    <div class="version">OGA International © 2026</div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <h1 id="pageTitle">แดชบอร์ด</h1>
+    <div class="actions">
+      <button class="btn btn-secondary btn-sm" onclick="syncAllData()" id="btnSync">🔄 Sync ข้อมูล</button>
+      <button class="btn btn-primary btn-sm" onclick="openBookingWizard()">+ จองรถใหม่</button>
+    </div>
+  </header>
+  <div class="content" id="contentArea">
+
+<section class="page active" id="page-dashboard">
+  <div class="stats-grid" id="dashStats"></div>
+  <div class="quick-grid" id="dashQuick"></div>
+  <div class="dash-grid">
+    <div class="card">
+      <div class="card-header"><h3>📊 สถานะการจอง</h3><button class="btn btn-secondary btn-sm" onclick="showPage('approvals')">ดูอนุมัติ</button></div>
+      <div class="card-body"><div class="donut-wrap" id="dashDonut"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>📈 การจองรายวัน (7 วันล่าสุด)</h3><button class="btn btn-secondary btn-sm" onclick="showPage('calendar')">ปฏิทิน</button></div>
+      <div class="card-body"><div class="chart-bars" id="dashBars"></div></div>
+    </div>
+  </div>
+  <div class="dash-grid">
+    <div class="card">
+      <div class="card-header"><h3>การจองล่าสุด</h3><button class="btn btn-secondary btn-sm" onclick="showPage('approvals')">ดูทั้งหมด</button></div>
+      <div class="card-body table-wrap"><table><thead><tr><th>รหัส</th><th>รถ</th><th>ผู้ขอ</th><th>ปลายทาง</th><th>วันที่</th><th>สถานะ</th></tr></thead><tbody id="dashRecent"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>🚙 สถานะยานพาหนะ</h3><button class="btn btn-secondary btn-sm" onclick="showPage('vehicles')">ดูรถทั้งหมด</button></div>
+      <div class="card-body table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>สถานะ</th></tr></thead><tbody id="dashVehicles"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-booking">
+  <div class="card"><div class="card-header"><h3>จองยานพาหนะ (4 ขั้นตอน)</h3></div>
+  <div class="card-body">
+    <div class="wizard-steps">
+      <div class="wizard-step active" id="ws1">1. เลือกรถ</div>
+      <div class="wizard-step" id="ws2">2. รายละเอียด</div>
+      <div class="wizard-step" id="ws3">3. คนขับ & ปลายทาง</div>
+      <div class="wizard-step" id="ws4">4. ยืนยัน</div>
+    </div>
+    <div id="wizardContent"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:20px">
+      <button class="btn btn-secondary" id="btnWizPrev" onclick="wizardPrev()" style="display:none">← ย้อนกลับ</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-primary" id="btnWizNext" onclick="wizardNext()">ถัดไป →</button>
+    </div>
+  </div></div>
+</section>
+
+<section class="page" id="page-calendar">
+  <div class="card"><div class="card-header"><h3 id="calTitle">ปฏิทินจองรถยนต์</h3>
+    <div class="cal-nav">
+      <button class="btn btn-secondary btn-sm" onclick="calPrev()">‹</button>
+      <button class="btn btn-secondary btn-sm" onclick="calToday()">วันนี้</button>
+      <button class="btn btn-secondary btn-sm" onclick="calNext()">›</button>
+      <button class="btn btn-primary btn-sm" onclick="openBookingWizard()">+ จอง</button>
+    </div></div>
+  <div class="card-body">
+    <div class="cal-legend" id="calLegend"></div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div></div>
+</section>
+
+<section class="page" id="page-approvals">
+  <div class="card"><div class="card-header"><h3>รายการรออนุมัติ / การจองทั้งหมด</h3>
+    <select class="form-control" style="width:160px" id="filterStatus" onchange="renderApprovals()">
+      <option value="">ทุกสถานะ</option><option value="รออนุมัติ">รออนุมัติ</option>
+      <option value="อนุมัติแล้ว">อนุมัติแล้ว</option><option value="ไม่อนุมัติ">ไม่อนุมัติ</option>
+      <option value="คืนรถแล้ว">คืนรถแล้ว</option>
+    </select></div>
+  <div class="card-body table-wrap"><table><thead><tr><th>รหัส</th><th>รถ</th><th>ผู้ขอ</th><th>แผนก</th><th>ปลายทาง</th><th>วันออก</th><th>วันกลับ</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+  <tbody id="approveTable"></tbody></table></div></div>
+</section>
+
+<section class="page" id="page-returns">
+  <div class="card"><div class="card-header"><h3>คืนยานพาหนะ</h3></div><div class="card-body" id="returnsList"></div></div>
+</section>
+
+<section class="page" id="page-vehicles">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h3 style="font-size:16px">ยานพาหนะทั้งหมด</h3>
+    <button class="btn btn-primary btn-sm" onclick="openVehicleModal()">+ เพิ่มรถ</button>
+  </div>
+  <div class="vehicle-grid" id="vehicleGrid"></div>
+</section>
+
+<section class="page" id="page-drivers">
+  <div class="card"><div class="card-header"><h3>คนขับรถ</h3><button class="btn btn-primary btn-sm" onclick="openDriverModal()">+ เพิ่มคนขับ</button></div>
+  <div class="card-body table-wrap"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>โทร</th><th>ใบขับขี่</th><th>หมดอายุ</th><th>เรตติ้ง</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+  <tbody id="driverTable"></tbody></table></div></div>
+</section>
+
+<section class="page" id="page-users">
+  <div class="card"><div class="card-header"><h3>ผู้ใช้งานระบบ</h3><button class="btn btn-primary btn-sm" onclick="openUserModal()">+ เพิ่มผู้ใช้</button></div>
+  <div class="card-body table-wrap"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>อีเมล</th><th>โทร</th><th>แผนก</th><th>บทบาท</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+  <tbody id="userTable"></tbody></table></div></div>
+</section>
+
+<section class="page" id="page-departments">
+  <div class="card"><div class="card-header"><h3>แผนกต่างๆ</h3><button class="btn btn-primary btn-sm" onclick="openDeptModal()">+ เพิ่มแผนก</button></div>
+  <div class="card-body table-wrap"><table><thead><tr><th>รหัส</th><th>ชื่อแผนก</th><th>ผู้จัดการ</th><th>โทร</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+  <tbody id="deptTable"></tbody></table></div></div>
+</section>
+
+<section class="page" id="page-maintenance">
+  <div class="stats-grid" id="maintStats"></div>
+  <div class="card"><div class="card-header"><h3>บันทึกการบำรุงรักษา</h3><button class="btn btn-primary btn-sm" onclick="openMaintModal()">+ เพิ่มรายการ</button></div>
+  <div class="card-body table-wrap"><table><thead><tr><th>รหัส</th><th>รถ</th><th>ประเภท</th><th>วันที่</th><th>ค่าใช้จ่าย</th><th>ครบกำหนดถัดไป</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+  <tbody id="maintTable"></tbody></table></div></div>
+</section>
+
+<section class="page" id="page-reports">
+  <div class="stats-grid" id="reportStats"></div>
+  <div class="card"><div class="card-header"><h3>สรุปการใช้งานตามแผนก</h3></div><div class="card-body" id="reportDept"></div></div>
+</section>
+
+<section class="page" id="page-gps">
+  <div class="card"><div class="card-header"><h3>GPS / Real-time Telematics</h3></div>
+  <div class="card-body">
+    <div style="height:360px;background:linear-gradient(135deg,#E0F2FE,#BAE6FD);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--text-secondary)">
+      <div style="font-size:48px">🗺️</div><div>แผนที่ GPS แสดงตำแหน่งรถแบบ Real-time</div>
+      <div style="font-size:12px">เชื่อมต่อ OBD-II / GPS Tracker</div>
+    </div>
+    <div class="stats-grid" style="margin-top:16px" id="gpsStats"></div>
+  </div></div>
+</section>
+
+<section class="page" id="page-google">
+  <div class="card"><div class="card-header"><h3>🔗 เชื่อมต่อ Google Sheet & Apps Script</h3></div>
+  <div class="card-body">
+    <div class="form-group"><label>Web App URL</label>
+      <input class="form-control" id="cfgWebAppUrl" placeholder="https://script.google.com/macros/s/.../exec"/></div>
+    <div class="form-group"><label>Spreadsheet ID</label>
+      <input class="form-control" id="cfgSheetId" placeholder="1BtnPg9M0Wi-kuPMDocMBw8nLSxrOh9PNVZPmVuYeJgE"/></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+      <button class="btn btn-primary" onclick="saveConfig()">💾 บันทึกการตั้งค่า</button>
+      <button class="btn btn-success" onclick="testPing()">🔌 ทดสอบเชื่อมต่อ (Ping)</button>
+      <button class="btn btn-secondary" onclick="initSheets()">📋 สร้าง/ตรวจโครงสร้างตาราง</button>
+      <button class="btn btn-secondary" onclick="syncAllData()">⬇️ ดึงข้อมูลทั้งหมด</button>
+    </div>
+    <div id="connResult" style="margin-top:16px;padding:14px;border-radius:10px;background:var(--bg);font-size:13px;display:none"></div>
+    <hr style="margin:22px 0;border:none;border-top:1px solid var(--border)"/>
+    <h4 style="margin-bottom:10px;font-size:14px">URL ที่ตั้งค่าเริ่มต้น (จากระบบของคุณ)</h4>
+    <p style="font-size:12px;color:var(--text-secondary);line-height:1.7">
+      Sheet: <code>1BtnPg9M0Wi-kuPMDocMBw8nLSxrOh9PNVZPmVuYeJgE</code><br>
+      Script: <code>AKfycbxk2zF987PT91-CxuxUjxhSA4F67olCoAFOyNmiFyU7nBo07fLdzl2-cm-OhC6_f2xZ</code>
+    </p>
+    <p style="font-size:12px;color:var(--text-secondary);margin-top:8px">หาก Refresh แล้วยังไม่เชื่อมต่อ กด <b>บันทึกการตั้งค่า</b> แล้ว <b>ดึงข้อมูลทั้งหมด</b> อีกครั้ง — ระบบจำ URL ในเครื่องอัตโนมัติ</p>
+  </div></div>
+</section>
+
+<section class="page" id="page-settings">
+  <div class="card"><div class="card-header"><h3>🎨 ธีม 3D / Glassmorphism (15 โทน)</h3></div>
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">เลือกธีม — ระบบจำค่าไว้ในเครื่องของคุณ</p>
+    <div class="theme-picker" id="themePicker"></div>
+    <div style="margin-top:24px">
+      <h4 style="font-size:14px;margin-bottom:10px">Color Palette หลัก</h4>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;font-size:12px">
+        <div style="padding:12px;border-radius:10px;background:#0A6B89;color:#fff;text-align:center">Primary<br>#0A6B89</div>
+        <div style="padding:12px;border-radius:10px;background:#FF8C00;color:#fff;text-align:center">Accent<br>#FF8C00</div>
+        <div style="padding:12px;border-radius:10px;background:#2BB673;color:#fff;text-align:center">Success<br>#2BB673</div>
+        <div style="padding:12px;border-radius:10px;background:#E53E3E;color:#fff;text-align:center">Danger<br>#E53E3E</div>
+        <div style="padding:12px;border-radius:10px;background:#F4F7F9;color:#333;border:1px solid #ddd;text-align:center">BG<br>#F4F7F9</div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+</div></div>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><div class="loading-text" id="loadingText">กำลังบันทึกข้อมูล...</div></div>
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-header"><h2 id="modalTitle">Modal</h2><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'oga_fleet_v31_cfg';
+const THEME_KEY = 'oga_fleet_v31_theme';
+const DEFAULT_WEBAPP = 'https://script.google.com/macros/s/AKfycbxk2zF987PT91-CxuxUjxhSA4F67olCoAFOyNmiFyU7nBo07fLdzl2-cm-OhC6_f2xZ/exec';
+const DEFAULT_SHEET = '1BtnPg9M0Wi-kuPMDocMBw8nLSxrOh9PNVZPmVuYeJgE';
+
+let state = {
+  users:[], departments:[], drivers:[], vehicles:[], bookings:[], maintenance:[], masterItems:[],
+  webAppUrl:'', sheetId:'', connected:false,
+  calYear:new Date().getFullYear(), calMonth:new Date().getMonth(),
+  wizardStep:1, wizardData:{}
+};
+
+const PLATE_COLORS = ['#0A6B89','#D97706','#059669','#7C3AED','#DC2626','#2563EB','#DB2777','#0891B2','#CA8A04','#4F46E5'];
+function plateColor(plate) {
+  if (!plate) return PLATE_COLORS[0];
+  let h = 0; const s = String(plate);
+  for (let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) >>> 0;
+  return PLATE_COLORS[h % PLATE_COLORS.length];
+}
+function plateBadge(plate) {
+  const c = plateColor(plate);
+  return `<span class="plate-badge" style="background:linear-gradient(145deg,${c},color-mix(in srgb,${c} 70%,#000))">${plate||'-'}</span>`;
+}
+
+const THEMES = [
+  {id:'', name:'OGA Teal', color:'#0A6B89'},
+  {id:'crimson', name:'Crimson 3D', color:'#C53030'},
+  {id:'cyberpunk', name:'Neon Cyberpunk', color:'#00D4FF'},
+  {id:'emerald', name:'Emerald', color:'#047857'},
+  {id:'sunset', name:'Sunset', color:'#DD6B20'},
+  {id:'ocean', name:'Ocean', color:'#2B6CB0'},
+  {id:'violet', name:'Violet', color:'#6B46C1'},
+  {id:'slate', name:'Slate', color:'#334155'},
+  {id:'rose', name:'Rose', color:'#BE185D'},
+  {id:'forest', name:'Forest', color:'#166534'},
+  {id:'midnight', name:'Midnight', color:'#1E3A5F'},
+  {id:'gold', name:'Gold', color:'#B45309'},
+  {id:'neon', name:'Neon', color:'#10B981'},
+  {id:'coral', name:'Coral', color:'#E11D48'},
+  {id:'indigo', name:'Indigo', color:'#4338CA'},
+  {id:'amber', name:'Amber', color:'#D97706'}
+];
+
+const PAGE_TITLES = {
+  dashboard:'แดชบอร์ด', booking:'จองยานพาหนะ', calendar:'ปฏิทินการจอง',
+  approvals:'อนุมัติการจอง', returns:'คืนยานพาหนะ', vehicles:'ยานพาหนะ',
+  drivers:'คนขับรถ', users:'ผู้ใช้งาน', departments:'แผนกต่างๆ',
+  maintenance:'บำรุงรักษา', reports:'รายงาน', gps:'GPS / Telematics',
+  google:'Google Sheet & Script', settings:'ตั้งค่า / ธีม'
+};
+
+/* ===== Date helpers (no timezone shift) ===== */
+function toLocalDDMMYYYY(input) {
+  if (!input && input !== 0) return '';
+  if (input instanceof Date && !isNaN(input)) {
+    return String(input.getDate()).padStart(2,'0')+'/'+String(input.getMonth()+1).padStart(2,'0')+'/'+input.getFullYear();
+  }
+  const s = String(input).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) { const p=s.substring(0,10).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) return s;
+  if (/^\d{1,2}-\d{1,2}-\d{4}/.test(s)) { const q=s.split('-'); return q[0]+'/'+q[1]+'/'+q[2]; }
+  try { const d=new Date(s); if(!isNaN(d)) return toLocalDDMMYYYY(d); } catch(e){}
+  return s;
+}
+/** Convert DD/MM/YYYY or any → YYYY-MM-DD for <input type="date"> */
+function toISODateInput(str) {
+  if (!str) return '';
+  const s = String(str).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) {
+    let [d,m,y] = s.split('/').map(Number);
+    // if Buddhist year (>2400) convert to CE for date input
+    if (y > 2400) y = y - 543;
+    return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  }
+  try { const d=new Date(s); if(!isNaN(d)) return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); } catch(e){}
+  return '';
+}
+function fromISODateInput(iso) {
+  if (!iso) return '';
+  return toLocalDDMMYYYY(iso); // always store as DD/MM/YYYY CE (or keep as-is display)
+}
+function todayLocal() { return toLocalDDMMYYYY(new Date()); }
+function toBEYear(y) { return y + 543; }
+function thaiMonthName(m) {
+  return ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'][m];
+}
+
+function showLoading(msg){ document.getElementById('loadingText').textContent=msg||'กำลังบันทึกข้อมูล...'; document.getElementById('loadingOverlay').classList.add('show'); }
+function hideLoading(){ document.getElementById('loadingOverlay').classList.remove('show'); }
+function toast(msg,type='success'){ const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.className='toast show '+type; setTimeout(()=>t.classList.remove('show'),3200); }
+function openModal(title,body,footer){ document.getElementById('modalTitle').textContent=title; document.getElementById('modalBody').innerHTML=body; document.getElementById('modalFooter').innerHTML=footer||''; document.getElementById('modalOverlay').classList.add('show'); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const c = JSON.parse(raw);
+      state.webAppUrl = c.webAppUrl || DEFAULT_WEBAPP;
+      state.sheetId = c.sheetId || DEFAULT_SHEET;
+    } else {
+      state.webAppUrl = DEFAULT_WEBAPP;
+      state.sheetId = DEFAULT_SHEET;
+    }
+  } catch(e) {
+    state.webAppUrl = DEFAULT_WEBAPP;
+    state.sheetId = DEFAULT_SHEET;
+  }
+  const elUrl = document.getElementById('cfgWebAppUrl');
+  const elId = document.getElementById('cfgSheetId');
+  if (elUrl) elUrl.value = state.webAppUrl;
+  if (elId) elId.value = state.sheetId;
+  applyTheme(localStorage.getItem(THEME_KEY) || '');
+}
+function saveConfig() {
+  state.webAppUrl = (document.getElementById('cfgWebAppUrl').value || '').trim() || DEFAULT_WEBAPP;
+  state.sheetId = (document.getElementById('cfgSheetId').value || '').trim() || DEFAULT_SHEET;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({webAppUrl: state.webAppUrl, sheetId: state.sheetId}));
+  document.getElementById('cfgWebAppUrl').value = state.webAppUrl;
+  document.getElementById('cfgSheetId').value = state.sheetId;
+  toast('บันทึกการตั้งค่าแล้ว');
+}
+function applyTheme(id) {
+  document.documentElement.setAttribute('data-theme', id || '');
+  localStorage.setItem(THEME_KEY, id || '');
+  document.querySelectorAll('.theme-swatch').forEach(el => el.classList.toggle('active', el.dataset.theme === (id||'')));
+}
+function renderThemePicker() {
+  document.getElementById('themePicker').innerHTML = THEMES.map(t =>
+    `<div class="theme-swatch" data-theme="${t.id}" style="background:${t.color}" title="${t.name}" onclick="applyTheme('${t.id}')"></div>`
+  ).join('');
+  const cur = localStorage.getItem(THEME_KEY) || '';
+  document.querySelectorAll('.theme-swatch').forEach(el => el.classList.toggle('active', el.dataset.theme === cur));
+}
+
+function buildUrl(action) {
+  if (!state.webAppUrl) return null;
+  let url = state.webAppUrl + (state.webAppUrl.includes('?') ? '&' : '?') + 'action=' + encodeURIComponent(action);
+  if (state.sheetId) url += '&spreadsheetId=' + encodeURIComponent(state.sheetId);
+  // cache-bust
+  url += '&_t=' + Date.now();
+  return url;
+}
+async function apiGet(action) {
+  const url = buildUrl(action);
+  if (!url) throw new Error('ยังไม่ได้ตั้งค่า Web App URL');
+  const res = await fetch(url, { method:'GET', redirect:'follow', mode:'cors' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.json();
+}
+async function apiPost(action, payload) {
+  if (!state.webAppUrl) throw new Error('ยังไม่ได้ตั้งค่า Web App URL');
+  const res = await fetch(state.webAppUrl, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({action, payload}),
+    redirect:'follow',
+    mode:'cors'
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.json();
+}
+
+async function testPing() {
+  showLoading('กำลังทดสอบการเชื่อมต่อ...');
+  try {
+    saveConfig();
+    const data = await apiGet('ping');
+    hideLoading();
+    state.connected = !!(data && data.success);
+    updateGsStatus();
+    const box = document.getElementById('connResult');
+    box.style.display = 'block';
+    box.style.background = state.connected ? '#F0FFF4' : '#FFF5F5';
+    box.innerHTML = state.connected
+      ? `<strong style="color:#276749">✅ เชื่อมต่อสำเร็จ</strong><br>${data.message||''}<br>Sheets: ${(data.sheets||[]).join(', ')}<br>เวลา: ${data.timestamp||''}`
+      : `<strong style="color:#C53030">❌ ไม่สำเร็จ</strong><br>${JSON.stringify(data)}`;
+    toast(state.connected ? 'เชื่อมต่อ Google Sheet สำเร็จ' : 'เชื่อมต่อไม่สำเร็จ', state.connected?'success':'error');
+  } catch(err) {
+    hideLoading(); state.connected=false; updateGsStatus();
+    const box=document.getElementById('connResult'); box.style.display='block'; box.style.background='#FFF5F5';
+    box.innerHTML = `<strong style="color:#C53030">❌ Error:</strong> ${err.message}`;
+    toast('เชื่อมต่อล้มเหลว: '+err.message,'error');
+  }
+}
+async function initSheets() {
+  showLoading('กำลังตรวจสอบโครงสร้างตาราง...');
+  try {
+    saveConfig();
+    const data = await apiGet('initSheets');
+    hideLoading();
+    toast(data.message || 'สำเร็จ');
+  } catch(err) { hideLoading(); toast('Error: '+err.message,'error'); }
+}
+
+async function syncAllData() {
+  showLoading('กำลังดึงข้อมูลจาก Google Sheet...');
+  try {
+    if (!state.webAppUrl) { state.webAppUrl = DEFAULT_WEBAPP; state.sheetId = DEFAULT_SHEET; }
+    saveConfig();
+    const data = await apiGet('getAll');
+    hideLoading();
+    if (data && data.success && data.data) {
+      state.users = normalizeList(data.data.users, 'user');
+      state.departments = normalizeList(data.data.departments, 'dept');
+      state.drivers = normalizeList(data.data.drivers, 'driver');
+      state.vehicles = normalizeList(data.data.vehicles, 'vehicle');
+      state.bookings = normalizeList(data.data.bookings, 'booking');
+      state.maintenance = normalizeList(data.data.maintenance, 'maint');
+      state.masterItems = data.data.masterItems || [];
+      state.connected = true;
+      updateGsStatus();
+      renderAll();
+      toast('ดึงข้อมูลสำเร็จ • ผู้ใช้ '+state.users.length+' • การจอง '+state.bookings.length+' • รถ '+state.vehicles.length);
+    } else {
+      toast('รูปแบบข้อมูลไม่ถูกต้อง','error');
+      if (!state.vehicles.length) loadDemoData();
+      renderAll();
+    }
+  } catch(err) {
+    hideLoading();
+    if (!state.vehicles.length) loadDemoData();
+    state.connected = false; updateGsStatus();
+    toast('ใช้ข้อมูลตัวอย่าง (ออฟไลน์): '+err.message,'error');
+    renderAll();
+  }
+}
+
+function pick(row, keys, def='') {
+  for (const k of keys) {
+    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k];
+  }
+  return def;
+}
+function normalizeList(arr, type) {
+  if (!Array.isArray(arr)) return [];
+  return arr.map(row => {
+    const o = {...row};
+    if (type==='booking') {
+      o.booking_id = pick(row,['booking_id','BookingCode','ID','id']);
+      o.plate = pick(row,['plate','Plate','LicensePlate']);
+      o.requester = pick(row,['requester','Requester','Name','name']);
+      o.department = pick(row,['department','Department']);
+      o.destination = pick(row,['destination','Destination']);
+      o.purpose = pick(row,['purpose','Purpose']);
+      o.start_date = toLocalDDMMYYYY(pick(row,['start_date','DepartureDate','StartDate','วันออก']));
+      o.end_date = toLocalDDMMYYYY(pick(row,['end_date','ReturnDate','EndDate','วันกลับ']));
+      o.start_time = pick(row,['start_time','StartTime'],'08:00');
+      o.end_time = pick(row,['end_time','EndTime'],'17:00');
+      o.status = pick(row,['status','Status'],'รออนุมัติ');
+      o.driver_name = pick(row,['driver_name','DriverName']);
+      o.driver_id = pick(row,['driver_id','DriverID']);
+      o.vehicle_id = pick(row,['vehicle_id','VehicleID']);
+      o.notes = pick(row,['notes','Notes']);
+    }
+    if (type==='vehicle') {
+      o.vehicle_id = pick(row,['vehicle_id','ID','id']);
+      o.plate = pick(row,['plate','Plate','LicensePlate']);
+      o.brand = pick(row,['brand','Brand'],'Toyota');
+      o.model = pick(row,['model','Model'],'Vios');
+      o.year = pick(row,['year','Year']);
+      o.color = pick(row,['color','Color']);
+      o.mileage = pick(row,['mileage','Mileage'],0);
+      o.status = pick(row,['status','Status'],'ว่าง');
+    }
+    if (type==='user') {
+      o.user_id = pick(row,['user_id','ID','id','EmployeeID']);
+      o.name = pick(row,['name','Name']);
+      o.email = pick(row,['email','Email']);
+      o.phone = pick(row,['phone','Phone']);
+      o.department = pick(row,['department','Department']);
+      o.role = pick(row,['role','Role','RoleLabel'],'User');
+      o.status = pick(row,['status','Status'],'Active');
+    }
+    if (type==='driver') {
+      o.driver_id = pick(row,['driver_id','ID','id']);
+      o.name = pick(row,['name','Name']);
+      o.phone = pick(row,['phone','Phone']);
+      o.license_no = pick(row,['license_no','LicenseNo','DrivingLicenseNo']);
+      o.license_expire = toLocalDDMMYYYY(pick(row,['license_expire','LicenseExpire','DrivingLicenseExpiry']));
+      o.rating = pick(row,['rating','Rating'],5);
+      o.status = pick(row,['status','Status'],'Active');
+    }
+    if (type==='dept') {
+      o.dept_id = pick(row,['dept_id','ID','id']);
+      o.name = pick(row,['name','Name']);
+      o.manager = pick(row,['manager','Manager']);
+      o.phone = pick(row,['phone','Phone']);
+      o.status = pick(row,['status','Status'],'Active');
+    }
+    if (type==='maint') {
+      o.maint_id = pick(row,['maint_id','ID','id']);
+      o.plate = pick(row,['plate','Plate']);
+      o.type = pick(row,['type','Type']);
+      o.date = toLocalDDMMYYYY(pick(row,['date','Date']));
+      o.cost = pick(row,['cost','Cost'],0);
+      o.next_due = toLocalDDMMYYYY(pick(row,['next_due','NextDue']));
+      o.status = pick(row,['status','Status'],'เสร็จสิ้น');
+    }
+    return o;
+  });
+}
+
+function updateGsStatus() {
+  const el = document.getElementById('gsStatus');
+  const txt = document.getElementById('gsStatusText');
+  if (state.connected) { el.classList.remove('offline'); txt.textContent = 'เชื่อมต่อ Google Sheet แล้ว'; }
+  else { el.classList.add('offline'); txt.textContent = 'ยังไม่เชื่อมต่อ'; }
+}
+
+function loadDemoData() {
+  state.vehicles = [
+    {vehicle_id:'V-2108', plate:'กท-2108', brand:'Toyota', model:'Vios', year:2022, mileage:45200, status:'ว่าง', color:'ขาว'},
+    {vehicle_id:'V-4470', plate:'กท-4470', brand:'Toyota', model:'Vios', year:2021, mileage:67800, status:'ว่าง', color:'เทา'}
+  ];
+  state.users = [
+    {user_id:'U01', name:'สมชาย ใจดี', email:'somchai@oga.co.th', phone:'081-111-1111', department:'Sales', role:'User', status:'Active'},
+    {user_id:'U02', name:'สมหญิง รักงาน', email:'somying@oga.co.th', phone:'082-222-2222', department:'HR', role:'Admin', status:'Active'}
+  ];
+  state.departments = [
+    {dept_id:'D01', name:'Sales', manager:'คุณสมชาย', phone:'02-111-1111', status:'Active'},
+    {dept_id:'D02', name:'HR', manager:'คุณสมหญิง', phone:'02-222-2222', status:'Active'},
+    {dept_id:'D03', name:'Business Solution', manager:'คุณมานี', phone:'02-333-3333', status:'Active'}
+  ];
+  state.drivers = [
+    {driver_id:'DR01', name:'นายประยุทธ์ ขับดี', phone:'089-999-0001', license_no:'12345678', license_expire:'15/08/2569', rating:4.8, status:'Active'},
+    {driver_id:'DR02', name:'นายสมบัติ ใจเย็น', phone:'089-999-0002', license_no:'87654321', license_expire:'20/12/2568', rating:4.5, status:'Active'}
+  ];
+  state.bookings = [
+    {booking_id:'BK-2569-001', plate:'กท-2108', requester:'สมชาย ใจดี', department:'Sales', destination:'โรงงานบางนา', purpose:'เยี่ยมลูกค้า', start_date:'04/09/2026', end_date:'04/09/2026', status:'ไม่อนุมัติ', driver_name:'นายประยุทธ์ ขับดี'},
+    {booking_id:'BK-2569-002', plate:'กท-4470', requester:'สมหญิง รักงาน', department:'HR', destination:'สำนักงานใหญ่', purpose:'ประชุม', start_date:'05/09/2026', end_date:'05/09/2026', status:'อนุมัติแล้ว', driver_name:'นายสมบัติ ใจเย็น'}
+  ];
+  state.maintenance = [
+    {maint_id:'M01', plate:'กท-2108', type:'เปลี่ยนน้ำมันเครื่อง', date:'10/08/2026', cost:2500, next_due:'10/02/2027', status:'เสร็จสิ้น'}
+  ];
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const page=document.getElementById('page-'+name); if(page) page.classList.add('active');
+  const nav=document.querySelector(`.nav-item[data-page="${name}"]`); if(nav) nav.classList.add('active');
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[name]||name;
+  if(name==='calendar') renderCalendar();
+  if(name==='booking') renderWizard();
+  if(name==='approvals') renderApprovals();
+  if(name==='returns') renderReturns();
+  if(name==='vehicles') renderVehicles();
+  if(name==='drivers') renderDrivers();
+  if(name==='users') renderUsers();
+  if(name==='departments') renderDepartments();
+  if(name==='maintenance') renderMaintenance();
+  if(name==='reports') renderReports();
+  if(name==='dashboard') renderDashboard();
+}
+document.getElementById('mainNav').addEventListener('click', e => {
+  const item = e.target.closest('.nav-item');
+  if (item && item.dataset.page) showPage(item.dataset.page);
+});
+
+function statusBadge(s) {
+  const map = {'ว่าง':'badge-success','ใช้งาน':'badge-info','ซ่อม':'badge-warning','รออนุมัติ':'badge-warning','อนุมัติแล้ว':'badge-success','ไม่อนุมัติ':'badge-danger','คืนรถแล้ว':'badge-muted','Active':'badge-success','Inactive':'badge-muted','เสร็จสิ้น':'badge-success'};
+  return `<span class="badge ${map[s]||'badge-muted'}">${s||'-'}</span>`;
+}
+
+function renderDashboard() {
+  const pending = state.bookings.filter(b => (b.status||'')==='รออนุมัติ').length;
+  const approved = state.bookings.filter(b => /อนุมัติแล้ว/.test(b.status||'') && !/รอ|ไม่/.test(b.status||'')).length;
+  const rejected = state.bookings.filter(b => /ไม่อนุมัติ|ยกเลิก/.test(b.status||'')).length;
+  const returned = state.bookings.filter(b => /คืนรถ/.test(b.status||'')).length;
+  const free = state.vehicles.filter(v => v.status==='ว่าง' || !v.status).length;
+  const inUse = state.vehicles.filter(v => /ใช้งาน|จอง/.test(v.status||'')).length;
+  const totalBk = state.bookings.length;
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card" onclick="showPage('approvals')"><span class="icon-bg">⏳</span>
+      <div class="label">รออนุมัติ</div><div class="value" style="color:#FFB300">${pending}</div>
+      <div class="sub">คลิกเพื่อดูรายการ →</div></div>
+    <div class="stat-card" onclick="showPage('approvals')"><span class="icon-bg">✅</span>
+      <div class="label">อนุมัติแล้ว</div><div class="value" style="color:#2BB673">${approved}</div>
+      <div class="sub">รายการ</div></div>
+    <div class="stat-card" onclick="showPage('returns')"><span class="icon-bg">↩️</span>
+      <div class="label">คืนรถแล้ว</div><div class="value" style="color:var(--primary)">${returned}</div>
+      <div class="sub">รายการ</div></div>
+    <div class="stat-card" onclick="showPage('vehicles')"><span class="icon-bg">🚙</span>
+      <div class="label">รถว่าง</div><div class="value" style="color:#0A6B89">${free}</div>
+      <div class="sub">จาก ${state.vehicles.length} คัน</div></div>
+    <div class="stat-card" onclick="showPage('drivers')"><span class="icon-bg">👤</span>
+      <div class="label">คนขับ</div><div class="value">${state.drivers.length}</div>
+      <div class="sub">คน</div></div>
+    <div class="stat-card" onclick="showPage('users')"><span class="icon-bg">👥</span>
+      <div class="label">ผู้ใช้</div><div class="value">${state.users.length}</div>
+      <div class="sub">บัญชี</div></div>`;
+
+  document.getElementById('dashQuick').innerHTML = `
+    <div class="quick-card" onclick="openBookingWizard()"><div class="qi">🚗</div><div class="qt">จองรถใหม่</div><div class="qs">สร้างการจอง</div></div>
+    <div class="quick-card" onclick="showPage('approvals')"><div class="qi">✅</div><div class="qt">อนุมัติการจอง</div><div class="qs">${pending} รายการรอ</div></div>
+    <div class="quick-card" onclick="showPage('calendar')"><div class="qi">📅</div><div class="qt">ปฏิทิน</div><div class="qs">ดูตารางจอง</div></div>
+    <div class="quick-card" onclick="showPage('vehicles')"><div class="qi">🚙</div><div class="qt">ยานพาหนะ</div><div class="qs">${free} คันว่าง</div></div>
+    <div class="quick-card" onclick="showPage('returns')"><div class="qi">↩️</div><div class="qt">คืนรถ</div><div class="qs">บันทึกคืนรถ</div></div>
+    <div class="quick-card" onclick="showPage('reports')"><div class="qi">📈</div><div class="qt">รายงาน</div><div class="qs">สถิติภาพรวม</div></div>`;
+
+  // Donut chart via conic-gradient
+  const a = approved, p = pending, r = rejected, t = returned;
+  const sum = Math.max(a+p+r+t, 1);
+  const p1 = (a/sum)*100, p2 = (p/sum)*100, p3 = (r/sum)*100, p4 = (t/sum)*100;
+  const g = `conic-gradient(#2BB673 0% ${p1}%, #FFB300 ${p1}% ${p1+p2}%, #E53E3E ${p1+p2}% ${p1+p2+p3}%, #718096 ${p1+p2+p3}% 100%)`;
+  document.getElementById('dashDonut').innerHTML = `
+    <div class="donut" style="background:${g}"><div class="donut-center"><strong>${totalBk}</strong><span>ทั้งหมด</span></div></div>
+    <div class="legend-list">
+      <div class="row"><span class="sw" style="background:#2BB673"></span>อนุมัติแล้ว <strong style="margin-left:auto">${a}</strong></div>
+      <div class="row"><span class="sw" style="background:#FFB300"></span>รออนุมัติ <strong style="margin-left:auto">${p}</strong></div>
+      <div class="row"><span class="sw" style="background:#E53E3E"></span>ไม่อนุมัติ <strong style="margin-left:auto">${r}</strong></div>
+      <div class="row"><span class="sw" style="background:#718096"></span>คืนรถแล้ว <strong style="margin-left:auto">${t}</strong></div>
+    </div>`;
+
+  // 7-day bar chart
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const dt = new Date(); dt.setDate(dt.getDate() - i);
+    const dd = String(dt.getDate()).padStart(2,'0');
+    const mm = String(dt.getMonth()+1).padStart(2,'0');
+    const y = dt.getFullYear();
+    const key1 = `${dd}/${mm}/${y}`;
+    const key2 = `${dd}/${mm}/${y+543}`;
+    const cnt = state.bookings.filter(b => {
+      const s = String(b.start_date||'');
+      return s === key1 || s === key2 || s.startsWith(`${dd}/${mm}/`);
+    }).length;
+    days.push({ label: `${dd}/${mm}`, cnt });
+  }
+  const maxC = Math.max(...days.map(d=>d.cnt), 1);
+  document.getElementById('dashBars').innerHTML = days.map(d => {
+    const h = Math.max(6, Math.round((d.cnt/maxC)*130));
+    return `<div class="chart-bar-wrap"><div class="chart-bar-val">${d.cnt||''}</div>
+      <div class="chart-bar" style="height:${h}px" title="${d.label}: ${d.cnt} รายการ"></div>
+      <div class="chart-bar-label">${d.label}</div></div>`;
+  }).join('');
+
+  // Recent bookings
+  document.getElementById('dashRecent').innerHTML = state.bookings.slice(0,6).map(b =>
+    `<tr style="cursor:pointer" onclick="showPage('approvals')">
+      <td>${b.booking_id||''}</td><td>${plateBadge(b.plate)}</td><td>${b.requester||''}</td>
+      <td>${b.destination||''}</td><td>${b.start_date||''}</td><td>${statusBadge(b.status)}</td></tr>`
+  ).join('') || '<tr><td colspan="6" class="empty-state">ยังไม่มีการจอง</td></tr>';
+
+  // Vehicles snapshot
+  document.getElementById('dashVehicles').innerHTML = state.vehicles.slice(0,6).map(v =>
+    `<tr style="cursor:pointer" onclick="showPage('vehicles')">
+      <td>${plateBadge(v.plate)}</td><td>${v.brand||''} ${v.model||''}</td><td>${statusBadge(v.status||'ว่าง')}</td></tr>`
+  ).join('') || '<tr><td colspan="3" class="empty-state">ยังไม่มีรถ</td></tr>';
+
+  const badge = document.getElementById('approveBadge');
+  if (badge) { badge.style.display = pending ? 'inline' : 'none'; badge.textContent = pending; }
+}
+
+function renderVehicles() {
+  const box=document.getElementById('vehicleGrid');
+  if(!state.vehicles.length){box.innerHTML='<div class="empty-state"><div class="icon">🚗</div>ยังไม่มีข้อมูลรถ</div>';return;}
+  box.innerHTML=state.vehicles.map(v=>{
+    const c=plateColor(v.plate);
+    return `<div class="vehicle-card">
+      <div class="img" style="background:linear-gradient(135deg,${c}33,${c}66)">🚗</div>
+      <div class="body">
+        <div class="plate">${plateBadge(v.plate)}</div>
+        <div class="meta">${v.brand||''} ${v.model||''} • ${v.year||''} ${v.color?('• '+v.color):''}</div>
+        <div class="meta">เลขไมล์: ${Number(v.mileage||0).toLocaleString()} กม. • ${statusBadge(v.status)}</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary btn-sm" onclick="selectVehicleForBooking('${v.vehicle_id}')">เลือกจอง</button>
+        <button class="btn btn-secondary btn-sm" onclick="openVehicleModal('${v.vehicle_id}')">แก้ไข</button>
+      </div></div>`;
+  }).join('');
+}
+
+function renderDrivers() {
+  document.getElementById('driverTable').innerHTML = state.drivers.length ? state.drivers.map(d=>
+    `<tr><td>${d.driver_id||''}</td><td>${d.name||''}</td><td>${d.phone||''}</td><td>${d.license_no||''}</td>
+    <td>${d.license_expire||''}</td><td>⭐ ${d.rating||'-'}</td><td>${statusBadge(d.status)}</td>
+    <td><button class="btn btn-secondary btn-sm" onclick="openDriverModal('${d.driver_id}')">แก้ไข</button></td></tr>`
+  ).join('') : '<tr><td colspan="8" class="empty-state">ยังไม่มีข้อมูล</td></tr>';
+}
+function renderUsers() {
+  document.getElementById('userTable').innerHTML = state.users.length ? state.users.map(u=>
+    `<tr><td>${u.user_id||''}</td><td>${u.name||''}</td><td>${u.email||''}</td><td>${u.phone||''}</td>
+    <td>${u.department||''}</td><td>${u.role||''}</td><td>${statusBadge(u.status)}</td>
+    <td><button class="btn btn-secondary btn-sm" onclick="openUserModal('${u.user_id}')">แก้ไข</button></td></tr>`
+  ).join('') : '<tr><td colspan="8" class="empty-state">ยังไม่มีข้อมูล</td></tr>';
+}
+function renderDepartments() {
+  document.getElementById('deptTable').innerHTML = state.departments.length ? state.departments.map(d=>
+    `<tr><td>${d.dept_id||''}</td><td>${d.name||''}</td><td>${d.manager||''}</td><td>${d.phone||''}</td>
+    <td>${statusBadge(d.status)}</td>
+    <td><button class="btn btn-secondary btn-sm" onclick="openDeptModal('${d.dept_id}')">แก้ไข</button></td></tr>`
+  ).join('') : '<tr><td colspan="6" class="empty-state">ยังไม่มีข้อมูล</td></tr>';
+}
+function renderApprovals() {
+  const filter=document.getElementById('filterStatus').value;
+  let list=state.bookings; if(filter) list=list.filter(b=>b.status===filter);
+  document.getElementById('approveTable').innerHTML = list.length ? list.map(b=>
+    `<tr><td>${b.booking_id||''}</td><td>${plateBadge(b.plate)}</td><td>${b.requester||''}</td><td>${b.department||''}</td>
+    <td>${b.destination||''}</td><td>${b.start_date||''}</td><td>${b.end_date||''}</td>
+    <td>${statusBadge(b.status)}</td>
+    <td style="white-space:nowrap">
+      ${b.status==='รออนุมัติ'?`<button class="btn btn-success btn-sm" onclick="approveBooking('${b.booking_id}',true)">อนุมัติ</button>
+      <button class="btn btn-danger btn-sm" onclick="approveBooking('${b.booking_id}',false)">ไม่อนุมัติ</button>`:''}
+      <button class="btn btn-secondary btn-sm" onclick="editBooking('${b.booking_id}')">แก้ไข</button>
+    </td></tr>`
+  ).join('') : '<tr><td colspan="9" class="empty-state">ไม่มีรายการ</td></tr>';
+}
+function renderReturns() {
+  const list=state.bookings.filter(b=>b.status==='อนุมัติแล้ว');
+  const box=document.getElementById('returnsList');
+  if(!list.length){box.innerHTML='<div class="empty-state"><div class="icon">↩️</div>ไม่มีรถที่ต้องคืน</div>';return;}
+  box.innerHTML=`<div class="vehicle-grid">${list.map(b=>`
+    <div class="vehicle-card"><div class="body">
+      <div class="plate">${plateBadge(b.plate)}</div>
+      <div class="meta">ผู้ขอ: ${b.requester||''} • ${b.department||''}</div>
+      <div class="meta">ปลายทาง: ${b.destination||''}</div>
+      <div class="meta">${b.start_date||''} → ${b.end_date||''}</div>
+    </div><div class="actions"><button class="btn btn-primary btn-sm" onclick="returnVehicle('${b.booking_id}')">ยืนยันคืนรถ</button></div></div>`).join('')}</div>`;
+}
+function renderMaintenance() {
+  const totalCost=state.maintenance.reduce((s,m)=>s+Number(m.cost||0),0);
+  document.getElementById('maintStats').innerHTML=`
+    <div class="stat-card"><div class="label">รายการบำรุงรักษา</div><div class="value">${state.maintenance.length}</div></div>
+    <div class="stat-card"><div class="label">ค่าใช้จ่ายรวม</div><div class="value">${totalCost.toLocaleString()}</div><div class="sub">บาท</div></div>`;
+  document.getElementById('maintTable').innerHTML = state.maintenance.length ? state.maintenance.map(m=>
+    `<tr><td>${m.maint_id||''}</td><td>${plateBadge(m.plate)}</td><td>${m.type||''}</td><td>${m.date||''}</td>
+    <td>${Number(m.cost||0).toLocaleString()}</td><td>${m.next_due||''}</td><td>${statusBadge(m.status)}</td>
+    <td><button class="btn btn-secondary btn-sm" onclick="openMaintModal('${m.maint_id}')">แก้ไข</button></td></tr>`
+  ).join('') : '<tr><td colspan="8" class="empty-state">ยังไม่มีข้อมูล</td></tr>';
+}
+function renderReports() {
+  const byDept={}; state.bookings.forEach(b=>{const d=b.department||'ไม่ระบุ'; byDept[d]=(byDept[d]||0)+1;});
+  document.getElementById('reportStats').innerHTML=`
+    <div class="stat-card"><div class="label">การจองทั้งหมด</div><div class="value">${state.bookings.length}</div></div>
+    <div class="stat-card"><div class="label">รถในระบบ</div><div class="value">${state.vehicles.length}</div></div>
+    <div class="stat-card"><div class="label">คนขับ</div><div class="value">${state.drivers.length}</div></div>
+    <div class="stat-card"><div class="label">ผู้ใช้</div><div class="value">${state.users.length}</div></div>`;
+  document.getElementById('reportDept').innerHTML = Object.keys(byDept).length
+    ? `<table><thead><tr><th>แผนก</th><th>จำนวนการจอง</th></tr></thead><tbody>
+        ${Object.entries(byDept).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</tbody></table>`
+    : '<div class="empty-state">ยังไม่มีข้อมูล</div>';
+}
+
+/** รายการที่วันกลับ (หรือวันออก) เลยวันนี้แล้ว → ไม่แสดงในปฏิทิน */
+function isBookingPast(b) {
+  const ed = String(b.end_date || b.ReturnDate || b.start_date || b.DepartureDate || '').trim();
+  if (!ed) return false;
+  const p = ed.split(/[\/\-]/);
+  if (p.length < 3) return false;
+  let day = +p[0], mon = +p[1], yr = +p[2];
+  if (yr > 2400) yr -= 543;
+  const end = new Date(yr, mon - 1, day, 23, 59, 59);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return end < today;
+}
+
+function matchBookingDate(b, d, m, y) {
+  const sd = String(b.start_date || b.DepartureDate || '').trim();
+  if (!sd) return false;
+  const dd = String(d).padStart(2,'0');
+  const mm = String(m+1).padStart(2,'0');
+  const yCE = String(y);
+  const yBE = String(toBEYear(y));
+  // DD/MM/YYYY or DD/MM/BE
+  if (sd === `${dd}/${mm}/${yCE}` || sd === `${dd}/${mm}/${yBE}`) return true;
+  if (sd.startsWith(`${dd}/${mm}/`)) return true;
+  // also match if date falls in range start..end
+  const ed = String(b.end_date || b.ReturnDate || sd).trim();
+  try {
+    const parse = (s) => {
+      const p = s.split(/[\/\-]/);
+      if (p.length < 3) return null;
+      let day=+p[0], mon=+p[1], yr=+p[2];
+      if (yr > 2400) yr -= 543;
+      return new Date(yr, mon-1, day);
+    };
+    const sD = parse(sd), eD = parse(ed), cur = new Date(y, m, d);
+    if (sD && eD && cur >= sD && cur <= eD) return true;
+  } catch(e){}
+  return false;
+}
+
+function renderCalendar() {
+  const y = state.calYear, m = state.calMonth;
+  const monthBookings = state.bookings.filter(b => {
+    if (isBookingPast(b)) return false;
+    for (let d=1; d<=31; d++) if (matchBookingDate(b, d, m, y)) return true;
+    return false;
+  });
+  document.getElementById('calTitle').textContent =
+    `📅 ปฏิทินจองรถยนต์  ${thaiMonthName(m)} ${toBEYear(y)}  (${monthBookings.length} รายการ)`;
+
+  // Legend by plate
+  const plateCounts = {};
+  monthBookings.forEach(b => {
+    const pl = b.plate || '-';
+    plateCounts[pl] = (plateCounts[pl]||0) + 1;
+  });
+  const legendEl = document.getElementById('calLegend');
+  if (legendEl) {
+    let lg = `<span class="lg">ทั้งหมด (${monthBookings.length})</span>`;
+    Object.entries(plateCounts).forEach(([pl, cnt]) => {
+      const c = plateColor(pl);
+      lg += `<span class="lg"><span class="dot" style="background:${c}"></span>${pl} (${cnt})</span>`;
+    });
+    legendEl.innerHTML = lg;
+  }
+
+  // Sunday-start (เหมือนภาพอ้างอิง: อาทิตย์ ... เสาร์)
+  const first = new Date(y, m, 1);
+  const startDay = first.getDay(); // 0=Sun
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const prevDays = new Date(y, m, 0).getDate();
+  const dayNames = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  let html = dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+  for (let i = startDay - 1; i >= 0; i--) {
+    html += `<div class="cal-cell other"><div class="day-num">${prevDays - i}</div></div>`;
+  }
+
+  const today = new Date();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = (d === today.getDate() && m === today.getMonth() && y === today.getFullYear());
+    const events = state.bookings.filter(b => matchBookingDate(b, d, m, y) && !isBookingPast(b));
+    const chips = events.map(ev => {
+      const st = String(ev.status || ev.Status || '');
+      let c, bg;
+      if (/อนุมัติแล้ว|approved|approve/i.test(st) && !/รอ|ไม่/.test(st)) {
+        c = '#2BB673'; bg = '#F0FFF4'; // เขียว = อนุมัติแล้ว
+      } else if (/ไม่อนุมัติ|ยกเลิก|reject|cancel/i.test(st)) {
+        c = '#E53E3E'; bg = '#FFF5F5'; // แดง = ยกเลิก/ไม่อนุมัติ
+      } else if (/คืนรถ|returned/i.test(st)) {
+        c = '#718096'; bg = '#EDF2F7'; // เทา = คืนรถแล้ว
+      } else {
+        c = plateColor(ev.plate); bg = `color-mix(in srgb,${c} 12%,#fff)`; // รออนุมัติ = สีทะเบียน
+      }
+      const time = (ev.start_time || ev.StartTime || '09:00').toString().substring(0,5);
+      const who = (ev.requester || ev.Requester || '').split(' ')[0] || '-';
+      const dest = ev.destination || ev.Destination || ev.purpose || ev.Purpose || '';
+      return `<div class="cal-chip" style="border-left-color:${c};background:${bg}" title="${st} • ${ev.requester||''} • ${dest}">
+        <div class="chip-plate" style="color:${c}">🚗 ${ev.plate||'-'}  ${time}</div>
+        <div class="chip-meta">👤 ${who}</div>
+        <div class="chip-meta">📍 ${dest}</div>
+      </div>`;
+    }).join('');
+    html += `<div class="cal-cell ${isToday?'today':''}"><div class="day-num">${d}</div>${chips}</div>`;
+  }
+  const totalCells = startDay + daysInMonth;
+  const remain = (7 - (totalCells % 7)) % 7;
+  for (let i = 1; i <= remain; i++) {
+    html += `<div class="cal-cell other"><div class="day-num">${i}</div></div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+function calPrev(){state.calMonth--;if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
+function calNext(){state.calMonth++;if(state.calMonth>11){state.calMonth=0;state.calYear++;}renderCalendar();}
+function calToday(){const n=new Date();state.calYear=n.getFullYear();state.calMonth=n.getMonth();renderCalendar();}
+
+function openBookingWizard(){state.wizardStep=1;state.wizardData={};showPage('booking');}
+function renderWizard() {
+  [1,2,3,4].forEach(i=>{const el=document.getElementById('ws'+i);el.classList.remove('active','done');if(i<state.wizardStep)el.classList.add('done');if(i===state.wizardStep)el.classList.add('active');});
+  document.getElementById('btnWizPrev').style.display=state.wizardStep>1?'inline-flex':'none';
+  document.getElementById('btnWizNext').textContent=state.wizardStep===4?'บันทึกการจอง':'ถัดไป →';
+  const box=document.getElementById('wizardContent');
+  if(state.wizardStep===1){
+    box.innerHTML=`<div class="vehicle-grid">${state.vehicles.map(v=>{
+      const sel=state.wizardData.vehicle_id===v.vehicle_id;
+      const c=plateColor(v.plate);
+      return `<div class="vehicle-card" style="${sel?'border-color:'+c+';box-shadow:0 0 0 2px '+c:''}" onclick="pickVehicle('${v.vehicle_id}')">
+        <div class="img" style="background:linear-gradient(135deg,${c}33,${c}66)">🚗</div>
+        <div class="body"><div class="plate">${plateBadge(v.plate)}</div>
+        <div class="meta">${v.brand} ${v.model}</div><div class="meta">${statusBadge(v.status)}</div></div></div>`;
+    }).join('')||'<div class="empty-state">ไม่มีรถในระบบ</div>'}</div>`;
+  } else if(state.wizardStep===2){
+    box.innerHTML=`
+      <div class="form-row">
+        <div class="form-group"><label>วันออกเดินทาง</label>
+          <input class="form-control" type="date" id="wStartDate" value="${toISODateInput(state.wizardData.start_date||todayLocal())}" onchange="document.getElementById('wEndDate').value=this.value"/></div>
+        <div class="form-group"><label>วันกลับ</label>
+          <input class="form-control" type="date" id="wEndDate" value="${toISODateInput(state.wizardData.end_date||state.wizardData.start_date||todayLocal())}"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>เวลาออก</label><input class="form-control" id="wStartTime" type="time" value="${state.wizardData.start_time||'08:00'}"/></div>
+        <div class="form-group"><label>เวลากลับ</label><input class="form-control" id="wEndTime" type="time" value="${state.wizardData.end_time||'17:00'}"/></div>
+      </div>
+      <div class="form-group"><label>ผู้ขอใช้รถ</label>
+        <select class="form-control" id="wRequester">${state.users.map(u=>`<option value="${u.name}" ${state.wizardData.requester===u.name?'selected':''}>${u.name} (${u.department||''})</option>`).join('')}</select></div>
+      <div class="form-group"><label>แผนก</label>
+        <select class="form-control" id="wDept">${state.departments.map(d=>`<option value="${d.name}" ${state.wizardData.department===d.name?'selected':''}>${d.name}</option>`).join('')}</select></div>`;
+  } else if(state.wizardStep===3){
+    box.innerHTML=`
+      <div class="form-group"><label>คนขับรถ</label>
+        <select class="form-control" id="wDriver">${state.drivers.map(d=>`<option value="${d.driver_id}" data-name="${d.name}" ${state.wizardData.driver_id===d.driver_id?'selected':''}>${d.name} (${d.phone||''})</option>`).join('')}</select></div>
+      <div class="form-group"><label>ปลายทาง</label><input class="form-control" id="wDest" value="${state.wizardData.destination||''}" placeholder="เช่น โรงงานบางนา"/></div>
+      <div class="form-group"><label>วัตถุประสงค์</label><input class="form-control" id="wPurpose" value="${state.wizardData.purpose||''}"/></div>
+      <div class="form-group"><label>หมายเหตุ</label><textarea class="form-control" id="wNotes" rows="2">${state.wizardData.notes||''}</textarea></div>`;
+  } else {
+    const v=state.vehicles.find(x=>x.vehicle_id===state.wizardData.vehicle_id)||{};
+    box.innerHTML=`<div style="background:var(--bg);border-radius:12px;padding:16px;font-size:13.5px;line-height:1.8">
+      <div><strong>รถ:</strong> ${plateBadge(v.plate)} ${v.brand||''} ${v.model||''}</div>
+      <div><strong>ผู้ขอ:</strong> ${state.wizardData.requester||'-'} • ${state.wizardData.department||''}</div>
+      <div><strong>วันที่:</strong> ${state.wizardData.start_date||''} → ${state.wizardData.end_date||''}</div>
+      <div><strong>เวลา:</strong> ${state.wizardData.start_time||''} - ${state.wizardData.end_time||''}</div>
+      <div><strong>คนขับ:</strong> ${state.wizardData.driver_name||'-'}</div>
+      <div><strong>ปลายทาง:</strong> ${state.wizardData.destination||'-'}</div>
+      <div><strong>วัตถุประสงค์:</strong> ${state.wizardData.purpose||'-'}</div></div>`;
+  }
+}
+function pickVehicle(id){state.wizardData.vehicle_id=id;const v=state.vehicles.find(x=>x.vehicle_id===id);if(v)state.wizardData.plate=v.plate;renderWizard();}
+function selectVehicleForBooking(id){pickVehicle(id);state.wizardStep=1;showPage('booking');}
+function wizardNext(){
+  if(state.wizardStep===1&&!state.wizardData.vehicle_id){toast('กรุณาเลือกรถ','error');return;}
+  if(state.wizardStep===2){
+    state.wizardData.start_date=fromISODateInput(document.getElementById('wStartDate').value);
+    state.wizardData.end_date=fromISODateInput(document.getElementById('wEndDate').value);
+    state.wizardData.start_time=document.getElementById('wStartTime').value;
+    state.wizardData.end_time=document.getElementById('wEndTime').value;
+    state.wizardData.requester=document.getElementById('wRequester').value;
+    state.wizardData.department=document.getElementById('wDept').value;
+  }
+  if(state.wizardStep===3){
+    const sel=document.getElementById('wDriver');
+    state.wizardData.driver_id=sel.value;
+    state.wizardData.driver_name=sel.options[sel.selectedIndex]?.dataset?.name||sel.options[sel.selectedIndex]?.text||'';
+    state.wizardData.destination=document.getElementById('wDest').value;
+    state.wizardData.purpose=document.getElementById('wPurpose').value;
+    state.wizardData.notes=document.getElementById('wNotes').value;
+  }
+  if(state.wizardStep===4){saveBooking();return;}
+  state.wizardStep++; renderWizard();
+}
+function wizardPrev(){if(state.wizardStep>1){state.wizardStep--;renderWizard();}}
+
+async function saveBooking(){
+  showLoading('กำลังบันทึกข้อมูลการจอง...');
+  // ส่งเฉพาะฟิลด์ที่ต้องการ — ไม่ส่ง booking_id/ID เพื่อบังคับให้ GAS สร้างแถวใหม่เสมอ
+  const payload = {
+    plate: state.wizardData.plate || '',
+    Plate: state.wizardData.plate || '',
+    vehicle_id: state.wizardData.vehicle_id || '',
+    VehicleID: state.wizardData.vehicle_id || '',
+    requester: state.wizardData.requester || '',
+    Requester: state.wizardData.requester || '',
+    department: state.wizardData.department || '',
+    Department: state.wizardData.department || '',
+    driver_id: state.wizardData.driver_id || '',
+    DriverID: state.wizardData.driver_id || '',
+    driver_name: state.wizardData.driver_name || '',
+    DriverName: state.wizardData.driver_name || '',
+    destination: state.wizardData.destination || '',
+    Destination: state.wizardData.destination || '',
+    purpose: state.wizardData.purpose || '',
+    Purpose: state.wizardData.purpose || '',
+    start_date: toLocalDDMMYYYY(state.wizardData.start_date),
+    DepartureDate: toLocalDDMMYYYY(state.wizardData.start_date),
+    end_date: toLocalDDMMYYYY(state.wizardData.end_date),
+    ReturnDate: toLocalDDMMYYYY(state.wizardData.end_date),
+    start_time: state.wizardData.start_time || '08:00',
+    StartTime: state.wizardData.start_time || '08:00',
+    end_time: state.wizardData.end_time || '17:00',
+    EndTime: state.wizardData.end_time || '17:00',
+    status: 'รออนุมัติ',
+    Status: 'รออนุมัติ',
+    notes: state.wizardData.notes || '',
+    Notes: state.wizardData.notes || ''
+  };
+  try{
+    let newId = null;
+    if(state.webAppUrl){
+      const res = await apiPost('saveBooking', payload);
+      if(res && res.success){
+        newId = res.id || (res.data && (res.data.ID || res.data.BookingCode));
+      }
+    }
+    payload.booking_id = newId || ('BK-'+toBEYear(new Date().getFullYear())+'-'+Date.now().toString(36).toUpperCase());
+    payload.plate = payload.Plate;
+    payload.requester = payload.Requester;
+    payload.department = payload.Department;
+    payload.destination = payload.Destination;
+    payload.purpose = payload.Purpose;
+    payload.start_date = payload.DepartureDate;
+    payload.end_date = payload.ReturnDate;
+    payload.driver_name = payload.DriverName;
+    payload.status = 'รออนุมัติ';
+    state.bookings.unshift(payload);
+    hideLoading();
+    toast('บันทึกการจองสำเร็จ (แถวใหม่ใน Sheet)');
+    showPage('approvals');
+    // sync ใหม่เพื่อดึงข้อมูลจริงจาก Sheet
+    setTimeout(()=>{ syncAllData().catch(()=>{}); }, 800);
+  }catch(err){
+    payload.booking_id = 'BK-LOCAL-'+Date.now();
+    payload.plate = payload.Plate;
+    payload.requester = payload.Requester;
+    payload.start_date = payload.DepartureDate;
+    payload.end_date = payload.ReturnDate;
+    payload.status = 'รออนุมัติ';
+    state.bookings.unshift(payload);
+    hideLoading();
+    toast('บันทึกในเครื่องแล้ว: '+err.message,'error');
+    showPage('approvals');
+  }
+}
+async function approveBooking(id,approve){
+  showLoading(approve?'กำลังอนุมัติ...':'กำลังไม่อนุมัติ...');
+  const b=state.bookings.find(x=>x.booking_id===id); if(!b){hideLoading();return;}
+  b.status=approve?'อนุมัติแล้ว':'ไม่อนุมัติ'; b.approved_date=todayLocal();
+  try{if(state.webAppUrl)await apiPost('approveBooking',{...b,approve});}catch(e){}
+  hideLoading();toast(approve?'อนุมัติแล้ว':'ไม่อนุมัติแล้ว');renderApprovals();renderDashboard();
+}
+async function returnVehicle(id){
+  showLoading('กำลังบันทึกการคืนรถ...');
+  const b=state.bookings.find(x=>x.booking_id===id); if(!b){hideLoading();return;}
+  b.status='คืนรถแล้ว'; b.return_date=todayLocal();
+  try{if(state.webAppUrl)await apiPost('returnVehicle',b);}catch(e){}
+  hideLoading();toast('คืนรถสำเร็จ');renderReturns();renderDashboard();
+}
+function editBooking(id){
+  const b=state.bookings.find(x=>x.booking_id===id); if(!b)return;
+  openModal('แก้ไขการจอง',`
+    <div class="form-group"><label>ผู้ขอ</label><input class="form-control" id="ebRequester" value="${b.requester||''}"/></div>
+    <div class="form-group"><label>ปลายทาง</label><input class="form-control" id="ebDest" value="${b.destination||''}"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>วันออก</label><input class="form-control" type="date" id="ebStart" value="${toISODateInput(b.start_date)}"/></div>
+      <div class="form-group"><label>วันกลับ</label><input class="form-control" type="date" id="ebEnd" value="${toISODateInput(b.end_date)}"/></div>
+    </div>
+    <div class="form-group"><label>สถานะ</label><select class="form-control" id="ebStatus">
+      <option ${b.status==='รออนุมัติ'?'selected':''}>รออนุมัติ</option>
+      <option ${b.status==='อนุมัติแล้ว'?'selected':''}>อนุมัติแล้ว</option>
+      <option ${b.status==='ไม่อนุมัติ'?'selected':''}>ไม่อนุมัติ</option>
+      <option ${b.status==='คืนรถแล้ว'?'selected':''}>คืนรถแล้ว</option>
+    </select></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+     <button class="btn btn-primary" onclick="saveEditBooking('${id}')">บันทึก</button>`);
+}
+async function saveEditBooking(id){
+  showLoading('กำลังบันทึกข้อมูล...');
+  const b=state.bookings.find(x=>x.booking_id===id); if(!b){hideLoading();return;}
+  b.requester=document.getElementById('ebRequester').value;
+  b.destination=document.getElementById('ebDest').value;
+  b.start_date=fromISODateInput(document.getElementById('ebStart').value);
+  b.end_date=fromISODateInput(document.getElementById('ebEnd').value);
+  b.status=document.getElementById('ebStatus').value;
+  try{if(state.webAppUrl)await apiPost('updateBooking',b);}catch(e){}
+  hideLoading();closeModal();toast('บันทึกการแก้ไขแล้ว');renderApprovals();
+}
+
+function openVehicleModal(id){
+  const v=id?state.vehicles.find(x=>x.vehicle_id===id):{};
+  openModal(id?'แก้ไขรถ':'เพิ่มรถ',`
+    <div class="form-row"><div class="form-group"><label>ทะเบียน</label><input class="form-control" id="mvPlate" value="${v.plate||''}"/></div>
+    <div class="form-group"><label>ยี่ห้อ</label><input class="form-control" id="mvBrand" value="${v.brand||'Toyota'}"/></div></div>
+    <div class="form-row"><div class="form-group"><label>รุ่น</label><input class="form-control" id="mvModel" value="${v.model||'Vios'}"/></div>
+    <div class="form-group"><label>ปี</label><input class="form-control" id="mvYear" value="${v.year||2022}"/></div></div>
+    <div class="form-row"><div class="form-group"><label>สีรถ</label><input class="form-control" id="mvColor" value="${v.color||''}" placeholder="ขาว / เทา / ดำ"/></div>
+    <div class="form-group"><label>เลขไมล์</label><input class="form-control" id="mvMile" type="number" value="${v.mileage||0}"/></div></div>
+    <div class="form-group"><label>สถานะ</label><select class="form-control" id="mvStatus"><option>ว่าง</option><option>ใช้งาน</option><option>ซ่อม</option></select></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button><button class="btn btn-primary" onclick="saveVehicle('${id||''}')">บันทึก</button>`);
+  if(v.status) document.getElementById('mvStatus').value=v.status;
+}
+async function saveVehicle(id){
+  showLoading('กำลังบันทึกข้อมูล...');
+  const payload={vehicle_id:id||undefined,plate:document.getElementById('mvPlate').value,brand:document.getElementById('mvBrand').value,model:document.getElementById('mvModel').value,year:document.getElementById('mvYear').value,color:document.getElementById('mvColor').value,mileage:document.getElementById('mvMile').value,status:document.getElementById('mvStatus').value};
+  try{if(state.webAppUrl){const r=await apiPost('saveVehicle',payload);if(r&&r.id)payload.vehicle_id=r.id;}}catch(e){}
+  if(!payload.vehicle_id)payload.vehicle_id='V-'+Date.now();
+  const idx=state.vehicles.findIndex(x=>x.vehicle_id===payload.vehicle_id);
+  if(idx>=0)state.vehicles[idx]=payload;else state.vehicles.push(payload);
+  hideLoading();closeModal();toast('บันทึกแล้ว');renderVehicles();
+}
+function openDriverModal(id){
+  const d=id?state.drivers.find(x=>x.driver_id===id):{};
+  openModal(id?'แก้ไขคนขับ':'เพิ่มคนขับ',`
+    <div class="form-group"><label>ชื่อ</label><input class="form-control" id="mdName" value="${d.name||''}"/></div>
+    <div class="form-row"><div class="form-group"><label>โทร</label><input class="form-control" id="mdPhone" value="${d.phone||''}"/></div>
+    <div class="form-group"><label>ใบขับขี่</label><input class="form-control" id="mdLic" value="${d.license_no||''}"/></div></div>
+    <div class="form-group"><label>วันหมดอายุ</label><input class="form-control" type="date" id="mdExp" value="${toISODateInput(d.license_expire)}"/></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button><button class="btn btn-primary" onclick="saveDriver('${id||''}')">บันทึก</button>`);
+}
+async function saveDriver(id){
+  showLoading('กำลังบันทึกข้อมูล...');
+  const payload={driver_id:id||undefined,name:document.getElementById('mdName').value,phone:document.getElementById('mdPhone').value,license_no:document.getElementById('mdLic').value,license_expire:fromISODateInput(document.getElementById('mdExp').value),rating:5,status:'Active'};
+  try{if(state.webAppUrl){const r=await apiPost('saveDriver',payload);if(r&&r.id)payload.driver_id=r.id;}}catch(e){}
+  if(!payload.driver_id)payload.driver_id='DR-'+Date.now();
+  const idx=state.drivers.findIndex(x=>x.driver_id===payload.driver_id);
+  if(idx>=0)state.drivers[idx]=payload;else state.drivers.push(payload);
+  hideLoading();closeModal();toast('บันทึกแล้ว');renderDrivers();
+}
+function openUserModal(id){
+  const u=id?state.users.find(x=>x.user_id===id):{};
+  openModal(id?'แก้ไขผู้ใช้':'เพิ่มผู้ใช้',`
+    <div class="form-group"><label>ชื่อ</label><input class="form-control" id="muName" value="${u.name||''}"/></div>
+    <div class="form-row"><div class="form-group"><label>อีเมล</label><input class="form-control" id="muEmail" value="${u.email||''}"/></div>
+    <div class="form-group"><label>โทร</label><input class="form-control" id="muPhone" value="${u.phone||''}"/></div></div>
+    <div class="form-row"><div class="form-group"><label>แผนก</label><input class="form-control" id="muDept" value="${u.department||''}"/></div>
+    <div class="form-group"><label>บทบาท</label><select class="form-control" id="muRole"><option>User</option><option>Admin</option><option>Manager</option></select></div></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button><button class="btn btn-primary" onclick="saveUser('${id||''}')">บันทึก</button>`);
+  if(u.role)document.getElementById('muRole').value=u.role;
+}
+async function saveUser(id){
+  showLoading('กำลังบันทึกข้อมูล...');
+  const payload={user_id:id||undefined,name:document.getElementById('muName').value,email:document.getElementById('muEmail').value,phone:document.getElementById('muPhone').value,department:document.getElementById('muDept').value,role:document.getElementById('muRole').value,status:'Active'};
+  try{if(state.webAppUrl){const r=await apiPost('saveUser',payload);if(r&&r.id)payload.user_id=r.id;}}catch(e){}
+  if(!payload.user_id)payload.user_id='U-'+Date.now();
+  const idx=state.users.findIndex(x=>x.user_id===payload.user_id);
+  if(idx>=0)state.users[idx]=payload;else state.users.push(payload);
+  hideLoading();closeModal();toast('บันทึกแล้ว');renderUsers();
+}
+function openDeptModal(id){
+  const d=id?state.departments.find(x=>x.dept_id===id):{};
+  openModal(id?'แก้ไขแผนก':'เพิ่มแผนก',`
+    <div class="form-group"><label>ชื่อแผนก</label><input class="form-control" id="mdpName" value="${d.name||''}"/></div>
+    <div class="form-row"><div class="form-group"><label>ผู้จัดการ</label><input class="form-control" id="mdpMgr" value="${d.manager||''}"/></div>
+    <div class="form-group"><label>โทร</label><input class="form-control" id="mdpPhone" value="${d.phone||''}"/></div></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button><button class="btn btn-primary" onclick="saveDept('${id||''}')">บันทึก</button>`);
+}
+async function saveDept(id){
+  showLoading('กำลังบันทึกข้อมูล...');
+  const payload={dept_id:id||undefined,name:document.getElementById('mdpName').value,manager:document.getElementById('mdpMgr').value,phone:document.getElementById('mdpPhone').value,status:'Active'};
+  try{if(state.webAppUrl){const r=await apiPost('saveDepartment',payload);if(r&&r.id)payload.dept_id=r.id;}}catch(e){}
+  if(!payload.dept_id)payload.dept_id='D-'+Date.now();
+  const idx=state.departments.findIndex(x=>x.dept_id===payload.dept_id);
+  if(idx>=0)state.departments[idx]=payload;else state.departments.push(payload);
+  hideLoading();closeModal();toast('บันทึกแล้ว');renderDepartments();
+}
+function openMaintModal(id){
+  const m=id?state.maintenance.find(x=>x.maint_id===id):{};
+  openModal(id?'แก้ไขบำรุงรักษา':'เพิ่มรายการ',`
+    <div class="form-group"><label>ทะเบียนรถ</label><select class="form-control" id="mmPlate">${state.vehicles.map(v=>`<option value="${v.plate}" ${m.plate===v.plate?'selected':''}>${v.plate}</option>`).join('')}</select></div>
+    <div class="form-group"><label>ประเภท</label><input class="form-control" id="mmType" value="${m.type||''}"/></div>
+    <div class="form-row"><div class="form-group"><label>วันที่</label><input class="form-control" type="date" id="mmDate" value="${toISODateInput(m.date||todayLocal())}"/></div>
+    <div class="form-group"><label>ค่าใช้จ่าย</label><input class="form-control" id="mmCost" type="number" value="${m.cost||0}"/></div></div>
+    <div class="form-group"><label>ครบกำหนดถัดไป</label><input class="form-control" type="date" id="mmNext" value="${toISODateInput(m.next_due)}"/></div>`,
+    `<button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button><button class="btn btn-primary" onclick="saveMaint('${id||''}')">บันทึก</button>`);
+}
+async function saveMaint(id){
+  showLoading('กำลังบันทึกข้อมูล...');
+  const payload={maint_id:id||undefined,plate:document.getElementById('mmPlate').value,type:document.getElementById('mmType').value,date:fromISODateInput(document.getElementById('mmDate').value),cost:document.getElementById('mmCost').value,next_due:fromISODateInput(document.getElementById('mmNext').value),status:'เสร็จสิ้น'};
+  try{if(state.webAppUrl){const r=await apiPost('saveMaintenance',payload);if(r&&r.id)payload.maint_id=r.id;}}catch(e){}
+  if(!payload.maint_id)payload.maint_id='M-'+Date.now();
+  const idx=state.maintenance.findIndex(x=>x.maint_id===payload.maint_id);
+  if(idx>=0)state.maintenance[idx]=payload;else state.maintenance.push(payload);
+  hideLoading();closeModal();toast('บันทึกแล้ว');renderMaintenance();
+}
+
+function renderAll(){renderDashboard();renderVehicles();renderDrivers();renderUsers();renderDepartments();renderApprovals();renderMaintenance();renderReports();renderCalendar();}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadConfig();
+  renderThemePicker();
+  loadDemoData();
+  renderAll();
+  // Auto-connect on load with saved/default URLs
+  if (state.webAppUrl) {
+    syncAllData().catch(()=>{});
+  }
+});
+</script>
+</body>
+</html>
