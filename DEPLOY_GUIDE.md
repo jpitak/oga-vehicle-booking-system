@@ -2,9 +2,9 @@
 
 ## URL ของระบบคุณ (ตั้งค่าเริ่มต้นในแอปแล้ว)
 
-- **Google Sheet:** https://docs.google.com/spreadsheets/d/1BtnPg9M0Wi-kuPMDocMBw8nLSxrOh9PNVZPmVuYeJgE/edit?usp=sharing
-- **Web App:** https://script.google.com/macros/s/AKfycbxk2zF987PT91-CxuxUjxhSA4F67olCoAFOyNmiFyU7nBo07fLdzl2-cm-OhC6_f2xZ/exec
-- **Spreadsheet ID:** `1BtnPg9M0Wi-kuPMDocMBw8nLSxrOh9PNVZPmVuYeJgE`
+- **Google Sheet:** https://docs.google.com/spreadsheets/d/1lVnrFrlhKWyZiUml_5vXSsFpjhGo_A1KOfFP4X92Z9E/edit?usp=sharing
+- **Web App:** https://script.google.com/macros/s/AKfycbx2zawd8M3YMO59wBUBPRIUpsF4RsWoZ9qjEUSS3g9gvOkUjylDJIy-Z9Vzu2iqNX8/exec
+- **Spreadsheet ID:** `1lVnrFrlhKWyZiUml_5vXSsFpjhGo_A1KOfFP4X92Z9E`
 
 ## ถ้า Refresh แล้วขาดการเชื่อมต่อ
 
@@ -18,7 +18,6 @@
 ระบบจำ URL ใน `localStorage` — ครั้งถัดไปจะ auto-sync เอง
 
 ## อัปเดต Apps Script (แนะนำ)
-
 1. เปิด Sheet → Extensions → Apps Script
 2. วางโค้ดใหม่จาก `gas/Code.gs` ทั้งไฟล์
 3. Save → Deploy → **Manage deployments** → แก้ไข (pencil) → Version: New version → Deploy
