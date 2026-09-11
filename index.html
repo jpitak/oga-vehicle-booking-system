@@ -81,35 +81,63 @@ button,input,select,textarea{font-family:inherit}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:22px}
-.stat-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;overflow:hidden;transition:.25s;cursor:pointer}
-.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent))}
-.stat-card .label{font-size:12px;color:var(--text-secondary);font-weight:500;margin-bottom:6px}
-.stat-card .value{font-size:28px;font-weight:800;line-height:1.1;color:var(--text)}
-.stat-card .sub{font-size:11px;color:var(--text-secondary);margin-top:4px}
-.stat-card .icon-bg{position:absolute;right:14px;top:14px;font-size:28px;opacity:.15}
-.dash-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:18px}
+.stat-card{border-radius:18px;padding:18px 20px;border:none;box-shadow:0 8px 24px rgba(0,0,0,.08);position:relative;overflow:hidden;transition:.25s;cursor:pointer;color:#1A202C}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.stat-card .label{font-size:12px;font-weight:600;margin-bottom:6px;opacity:.75}
+.stat-card .value{font-size:32px;font-weight:800;line-height:1.1}
+.stat-card .sub{font-size:11px;margin-top:6px;opacity:.7}
+.stat-card .icon-bg{position:absolute;right:12px;top:12px;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(255,255,255,.45);backdrop-filter:blur(4px)}
+.stat-card.sc-pending{background:linear-gradient(145deg,#FFF7ED,#FED7AA)}
+.stat-card.sc-pending .value{color:#C05621}
+.stat-card.sc-ok{background:linear-gradient(145deg,#F0FFF4,#9AE6B4)}
+.stat-card.sc-ok .value{color:#276749}
+.stat-card.sc-return{background:linear-gradient(145deg,#E6FFFA,#81E6D9)}
+.stat-card.sc-return .value{color:#234E52}
+.stat-card.sc-free{background:linear-gradient(145deg,#EBF8FF,#90CDF4)}
+.stat-card.sc-free .value{color:#2B6CB0}
+.stat-card.sc-driver{background:linear-gradient(145deg,#FFFFF0,#F6E05E)}
+.stat-card.sc-driver .value{color:#975A16}
+.stat-card.sc-user{background:linear-gradient(145deg,#EBF4FF,#A3BFFA)}
+.stat-card.sc-user .value{color:#3C366B}
+.dash-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-bottom:18px}
 @media(max-width:1000px){.dash-grid{grid-template-columns:1fr}}
-.chart-bars{display:flex;align-items:flex-end;gap:10px;height:160px;padding:8px 4px 0}
+.chart-bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding:8px 4px 0}
 .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
-.chart-bar{width:100%;max-width:36px;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,var(--primary-light),var(--primary));box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 30%,transparent);transition:.3s;min-height:4px}
-.chart-bar:hover{filter:brightness(1.08);transform:scaleY(1.03)}
-.chart-bar-label{font-size:10px;color:var(--text-secondary);margin-top:6px;text-align:center}
+.chart-bar{width:100%;max-width:34px;border-radius:10px 10px 6px 6px;transition:.3s;min-height:6px;box-shadow:0 6px 16px rgba(0,0,0,.15)}
+.chart-bar:hover{filter:brightness(1.1);transform:scaleY(1.04)}
+.chart-bar-label{font-size:10px;color:var(--text-secondary);margin-top:6px;text-align:center;font-weight:600}
 .chart-bar-val{font-size:10px;font-weight:700;color:var(--text);margin-bottom:4px}
-.donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-.donut{width:130px;height:130px;border-radius:50%;position:relative}
-.donut-center{position:absolute;inset:28px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;z-index:1}
+.donut{width:130px;height:130px;border-radius:50%;position:relative;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.donut-center{position:absolute;inset:26px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:inset 0 0 0 1px var(--border)}
 .donut-center strong{font-size:22px;font-weight:800}
 .donut-center span{font-size:10px;color:var(--text-secondary)}
 .legend-list{display:flex;flex-direction:column;gap:8px;font-size:12px}
 .legend-list .row{display:flex;align-items:center;gap:8px}
-.legend-list .sw{width:12px;height:12px;border-radius:4px}
+.legend-list .sw{width:12px;height:12px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
-.quick-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-.quick-card:hover{border-color:var(--primary-light);transform:translateY(-2px);box-shadow:var(--shadow)}
-.quick-card .qi{font-size:28px;margin-bottom:8px}
-.quick-card .qt{font-size:13px;font-weight:700;color:var(--text)}
-.quick-card .qs{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.quick-card{border:none;border-radius:16px;padding:18px 14px;text-align:center;cursor:pointer;transition:.25s;box-shadow:0 6px 18px rgba(0,0,0,.07);position:relative;overflow:hidden}
+.quick-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.12)}
+.quick-card .qi{width:48px;height:48px;margin:0 auto 10px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(255,255,255,.55);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.quick-card .qt{font-size:13px;font-weight:700;color:#1A202C}
+.quick-card .qs{font-size:11px;color:#4A5568;margin-top:3px;opacity:.85}
+.quick-card.qc-1{background:linear-gradient(160deg,#FFF7ED,#FDBA74)}
+.quick-card.qc-2{background:linear-gradient(160deg,#F0FFF4,#68D391)}
+.quick-card.qc-3{background:linear-gradient(160deg,#E6FFFA,#4FD1C5)}
+.quick-card.qc-4{background:linear-gradient(160deg,#EBF8FF,#63B3ED)}
+.quick-card.qc-5{background:linear-gradient(160deg,#FFFFF0,#F6E05E)}
+.quick-card.qc-6{background:linear-gradient(160deg,#EBF4FF,#7F9CF5)}
+.dash-chart-card{position:relative;overflow:hidden}
+.dash-chart-card .wave-bg{position:absolute;right:0;top:0;bottom:0;width:48%;background:linear-gradient(135deg,#0A2540 0%,#1A365D 40%,#2B6CB0 100%);opacity:.95;border-radius:0 var(--radius) var(--radius) 0}
+.dash-chart-card .wave-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cpath d='M0 100 Q50 50 100 100 T200 100 T300 100 T400 100' fill='none' stroke='rgba(99,179,237,0.5)' stroke-width='2'/%3E%3Cpath d='M0 120 Q50 70 100 120 T200 120 T300 120 T400 120' fill='none' stroke='rgba(237,100,166,0.4)' stroke-width='2'/%3E%3Cpath d='M0 80 Q50 30 100 80 T200 80 T300 80 T400 80' fill='none' stroke='rgba(129,230,217,0.45)' stroke-width='2'/%3E%3C/svg%3E") center/cover no-repeat}
+.dash-chart-card .card-body{position:relative;z-index:1}
+.row-tint-ok{background:linear-gradient(90deg,#F0FFF4,transparent)}
+.row-tint-wait{background:linear-gradient(90deg,#FFFAF0,transparent)}
+.row-tint-no{background:linear-gradient(90deg,#FFF5F5,transparent)}
+.vu-card{border-radius:12px;padding:10px 12px;margin-bottom:8px;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center}
+.vu-card:nth-child(odd){background:linear-gradient(90deg,#EDF2F7,transparent)}
+.vu-card:nth-child(even){background:linear-gradient(90deg,#FEFCBF,transparent)}
+
 
 
 .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
@@ -298,8 +326,9 @@ input[type="date"].form-control{min-height:42px}
   <div class="stats-grid" id="dashStats"></div>
   <div class="quick-grid" id="dashQuick"></div>
   <div class="dash-grid">
-    <div class="card">
-      <div class="card-header"><h3>📊 สถานะการจอง</h3><button class="btn btn-secondary btn-sm" onclick="showPage('approvals')">ดูอนุมัติ</button></div>
+    <div class="card dash-chart-card">
+      <div class="wave-bg" aria-hidden="true"></div>
+      <div class="card-header" style="position:relative;z-index:1"><h3>📊 สถานะการจอง</h3><button class="btn btn-secondary btn-sm" onclick="showPage('approvals')">ดูอนุมัติ</button></div>
       <div class="card-body"><div class="donut-wrap" id="dashDonut"></div></div>
     </div>
     <div class="card">
@@ -313,8 +342,8 @@ input[type="date"].form-control{min-height:42px}
       <div class="card-body table-wrap"><table><thead><tr><th>รหัส</th><th>รถ</th><th>ผู้ขอ</th><th>ปลายทาง</th><th>วันที่</th><th>สถานะ</th></tr></thead><tbody id="dashRecent"></tbody></table></div>
     </div>
     <div class="card">
-      <div class="card-header"><h3>🚙 สถานะยานพาหนะ</h3><button class="btn btn-secondary btn-sm" onclick="showPage('vehicles')">ดูรถทั้งหมด</button></div>
-      <div class="card-body table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>ผู้ใช้ล่าสุด (ก่อนวันนี้)</th><th>สถานะ</th></tr></thead><tbody id="dashVehicles"></tbody></table></div>
+      <div class="card-header"><h3>👤 ผู้ใช้งานล่าสุด</h3><button class="btn btn-secondary btn-sm" onclick="showPage('vehicles')">ดูรถทั้งหมด</button></div>
+      <div class="card-body table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>ผู้ใช้ล่าสุด (ก่อนวันนี้)</th></tr></thead><tbody id="dashVehicles"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -903,37 +932,66 @@ function renderDashboard() {
   const approved = state.bookings.filter(b => /อนุมัติแล้ว/.test(b.status||'') && !/รอ|ไม่/.test(b.status||'')).length;
   const rejected = state.bookings.filter(b => /ไม่อนุมัติ|ยกเลิก/.test(b.status||'')).length;
   const returned = state.bookings.filter(b => /คืนรถ/.test(b.status||'')).length;
-  const free = state.vehicles.filter(v => v.status==='ว่าง' || !v.status).length;
+  const free = state.vehicles.filter(v => {
+    // รถถูกใช้งานวันนี้ ถ้ามีการจองที่ครอบคลุมวันนี้และสถานะอนุมัติ/ใช้งาน
+    const plate = v.plate || '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const busy = state.bookings.some(b => {
+      if (String(b.plate||'') !== String(plate) && String(b.VehicleID||'') !== String(v.vehicle_id||'')) return false;
+      const st = String(b.status||'');
+      if (/ไม่อนุมัติ|ยกเลิก/.test(st)) return false;
+      if (!/อนุมัติ|ใช้งาน|รออนุมัติ/.test(st) && st) {
+        // ถ้ามีสถานะอื่นที่ไม่เกี่ยวกับการใช้รถ
+        if (/คืนรถ/.test(st)) return false;
+      }
+      // รออนุมัติยังไม่นับว่าใช้รถจริง — นับเฉพาะอนุมัติแล้ว
+      if (st === 'รออนุมัติ') return false;
+      if (!/อนุมัติ|ใช้งาน/.test(st)) return false;
+      const sd = String(b.start_date||b.DepartureDate||'').trim();
+      const ed = String(b.end_date||b.ReturnDate||sd).trim();
+      const parse = (s) => {
+        const p = s.split(/[\/\-]/);
+        if (p.length < 3) return null;
+        let y = +p[2]; if (y > 2400) y -= 543;
+        return new Date(y, +p[1]-1, +p[0]);
+      };
+      const sD = parse(sd), eD = parse(ed);
+      if (!sD) return false;
+      const end = eD || sD;
+      return today >= sD && today <= end;
+    });
+    return !busy;
+  }).length;
   const inUse = state.vehicles.filter(v => /ใช้งาน|จอง/.test(v.status||'')).length;
   const totalBk = state.bookings.length;
 
   document.getElementById('dashStats').innerHTML = `
-    <div class="stat-card" onclick="showPage('approvals')"><span class="icon-bg">⏳</span>
-      <div class="label">รออนุมัติ</div><div class="value" style="color:#FFB300">${pending}</div>
+    <div class="stat-card sc-pending" onclick="showPage('approvals')"><span class="icon-bg">⏳</span>
+      <div class="label">รออนุมัติ</div><div class="value">${pending}</div>
       <div class="sub">คลิกเพื่อดูรายการ →</div></div>
-    <div class="stat-card" onclick="showPage('approvals')"><span class="icon-bg">✅</span>
-      <div class="label">อนุมัติแล้ว</div><div class="value" style="color:#2BB673">${approved}</div>
+    <div class="stat-card sc-ok" onclick="showPage('approvals')"><span class="icon-bg">✅</span>
+      <div class="label">อนุมัติแล้ว</div><div class="value">${approved}</div>
       <div class="sub">รายการ</div></div>
-    <div class="stat-card" onclick="showPage('returns')"><span class="icon-bg">↩️</span>
-      <div class="label">คืนรถแล้ว</div><div class="value" style="color:var(--primary)">${returned}</div>
+    <div class="stat-card sc-return" onclick="showPage('returns')"><span class="icon-bg">↩️</span>
+      <div class="label">คืนรถแล้ว</div><div class="value">${returned}</div>
       <div class="sub">รายการ</div></div>
-    <div class="stat-card" onclick="showPage('vehicles')"><span class="icon-bg">🚙</span>
-      <div class="label">รถว่าง</div><div class="value" style="color:#0A6B89">${free}</div>
+    <div class="stat-card sc-free" onclick="showPage('vehicles')"><span class="icon-bg">🚙</span>
+      <div class="label">รถว่าง</div><div class="value">${free}</div>
       <div class="sub">จาก ${state.vehicles.length} คัน</div></div>
-    <div class="stat-card" onclick="showPage('drivers')"><span class="icon-bg">👤</span>
+    <div class="stat-card sc-driver" onclick="showPage('drivers')"><span class="icon-bg">👤</span>
       <div class="label">คนขับ</div><div class="value">${state.drivers.length}</div>
       <div class="sub">คน</div></div>
-    <div class="stat-card" onclick="showPage('users')"><span class="icon-bg">👥</span>
+    <div class="stat-card sc-user" onclick="showPage('users')"><span class="icon-bg">👥</span>
       <div class="label">ผู้ใช้</div><div class="value">${state.users.length}</div>
       <div class="sub">บัญชี</div></div>`;
 
   document.getElementById('dashQuick').innerHTML = `
-    <div class="quick-card" onclick="openBookingWizard()"><div class="qi">🚗</div><div class="qt">จองรถใหม่</div><div class="qs">สร้างการจอง</div></div>
-    <div class="quick-card" onclick="showPage('approvals')"><div class="qi">✅</div><div class="qt">อนุมัติการจอง</div><div class="qs">${pending} รายการรอ</div></div>
-    <div class="quick-card" onclick="showPage('calendar')"><div class="qi">📅</div><div class="qt">ปฏิทิน</div><div class="qs">ดูตารางจอง</div></div>
-    <div class="quick-card" onclick="showPage('vehicles')"><div class="qi">🚙</div><div class="qt">ยานพาหนะ</div><div class="qs">${free} คันว่าง</div></div>
-    <div class="quick-card" onclick="showPage('returns')"><div class="qi">↩️</div><div class="qt">คืนรถ</div><div class="qs">บันทึกคืนรถ</div></div>
-    <div class="quick-card" onclick="showPage('reports')"><div class="qi">📈</div><div class="qt">รายงาน</div><div class="qs">สถิติภาพรวม</div></div>`;
+    <div class="quick-card qc-1" onclick="openBookingWizard()"><div class="qi">🚗</div><div class="qt">จองรถใหม่</div><div class="qs">สร้างการจอง</div></div>
+    <div class="quick-card qc-2" onclick="showPage('approvals')"><div class="qi">✅</div><div class="qt">อนุมัติการจอง</div><div class="qs">${pending} รายการรอ</div></div>
+    <div class="quick-card qc-3" onclick="showPage('calendar')"><div class="qi">📅</div><div class="qt">ปฏิทิน</div><div class="qs">ดูตารางจอง</div></div>
+    <div class="quick-card qc-4" onclick="showPage('vehicles')"><div class="qi">🚙</div><div class="qt">ยานพาหนะ</div><div class="qs">${free} คันว่าง</div></div>
+    <div class="quick-card qc-5" onclick="showPage('returns')"><div class="qi">↩️</div><div class="qt">คืนรถ</div><div class="qs">บันทึกคืนรถ</div></div>
+    <div class="quick-card qc-6" onclick="showPage('reports')"><div class="qi">📈</div><div class="qt">รายงาน</div><div class="qs">สถิติภาพรวม</div></div>`;
 
   // Donut chart via conic-gradient
   const a = approved, p = pending, r = rejected, t = returned;
@@ -965,19 +1023,26 @@ function renderDashboard() {
     days.push({ label: `${dd}/${mm}`, cnt });
   }
   const maxC = Math.max(...days.map(d=>d.cnt), 1);
-  document.getElementById('dashBars').innerHTML = days.map(d => {
-    const h = Math.max(6, Math.round((d.cnt/maxC)*130));
+  const barColors = ['#9F7AEA','#ED64A6','#4FD1C5','#667EEA','#F6AD55','#38B2AC','#F6E05E'];
+  document.getElementById('dashBars').innerHTML = days.map((d,i) => {
+    const h = Math.max(8, Math.round((d.cnt/maxC)*140));
+    const c = barColors[i % barColors.length];
     return `<div class="chart-bar-wrap"><div class="chart-bar-val">${d.cnt||''}</div>
-      <div class="chart-bar" style="height:${h}px" title="${d.label}: ${d.cnt} รายการ"></div>
+      <div class="chart-bar" style="height:${h}px;background:linear-gradient(180deg,${c},color-mix(in srgb,${c} 70%,#000))" title="${d.label}: ${d.cnt} รายการ"></div>
       <div class="chart-bar-label">${d.label}</div></div>`;
   }).join('');
 
   // Recent bookings
-  document.getElementById('dashRecent').innerHTML = state.bookings.slice(0,6).map(b =>
-    `<tr style="cursor:pointer" onclick="showPage('approvals')">
+  document.getElementById('dashRecent').innerHTML = state.bookings.slice(0,6).map(b => {
+    const st = String(b.status||'');
+    let tint = '';
+    if (/อนุมัติแล้ว/.test(st) && !/ไม่/.test(st)) tint = 'row-tint-ok';
+    else if (st === 'รออนุมัติ') tint = 'row-tint-wait';
+    else if (/ไม่อนุมัติ|ยกเลิก/.test(st)) tint = 'row-tint-no';
+    return `<tr class="${tint}" style="cursor:pointer" onclick="showPage('approvals')">
       <td>${b.booking_id||''}</td><td>${plateBadge(b.plate)}</td><td>${b.requester||''}</td>
-      <td>${b.destination||''}</td><td>${b.start_date||''}</td><td>${statusBadge(b.status)}</td></tr>`
-  ).join('') || '<tr><td colspan="6" class="empty-state">ยังไม่มีการจอง</td></tr>';
+      <td>${b.destination||''}</td><td>${b.start_date||''}</td><td>${statusBadge(b.status)}</td></tr>`;
+  }).join('') || '<tr><td colspan="6" class="empty-state">ยังไม่มีการจอง</td></tr>';
 
   // ยานพาหนะ + ผู้ใช้ล่าสุด (การจองก่อนวันนี้เท่านั้น)
   document.getElementById('dashVehicles').innerHTML = state.vehicles.slice(0,8).map(v => {
@@ -1013,9 +1078,8 @@ function renderDashboard() {
     return `<tr style="cursor:pointer" onclick="showPage('vehicles')">
       <td>${plateBadge(plate)}</td>
       <td>${v.brand||''} ${v.model||''}</td>
-      <td>${lastHtml}</td>
-      <td>${statusBadge(v.status||'ว่าง')}</td></tr>`;
-  }).join('') || '<tr><td colspan="4" class="empty-state">ยังไม่มีรถ</td></tr>';
+      <td>${lastHtml}</td></tr>`;
+  }).join('') || '<tr><td colspan="3" class="empty-state">ยังไม่มีรถ</td></tr>';
 
   const badge = document.getElementById('approveBadge');
   if (badge) { badge.style.display = pending ? 'inline' : 'none'; badge.textContent = pending; }
