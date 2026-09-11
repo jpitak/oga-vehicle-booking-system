@@ -39,7 +39,6 @@ function getSpreadsheet(e) {
   } catch (err2) {}
   return null;
 }
-
 function jsonResponse(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
@@ -438,7 +437,6 @@ function saveRow_(ss, sheetName, data, idField, headers, altIdField, forceInsert
       }
     }
   }
-
   var row = hdrs.map(function (h) {
     return (normalized[h] !== undefined && normalized[h] !== null) ? normalized[h] : '';
   });
