@@ -146,6 +146,14 @@ tr:hover td{background:color-mix(in srgb,var(--primary) 4%,transparent)}
 .cal-chip{font-size:10px;padding:5px 7px;border-radius:8px;margin-bottom:4px;color:#1a1a1a;font-weight:600;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.1);border-left:3px solid;background:#fff;line-height:1.35}
 .cal-chip .chip-plate{font-weight:800;font-size:11px}
 .cal-chip .chip-meta{font-size:9.5px;color:#555;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-list{display:flex;flex-direction:column;gap:10px}
+.cal-list-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.04);border-left:4px solid var(--primary);cursor:pointer;transition:.2s}
+.cal-list-item:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.cal-list-item .cli-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.cal-list-item .cli-date{font-weight:800;font-size:14px;color:var(--primary)}
+.cal-list-item .cli-row{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;color:var(--text);line-height:1.5}
+.cal-list-item .cli-row span{display:inline-flex;align-items:center;gap:4px}
+.cal-list-empty{text-align:center;padding:32px;color:var(--text-secondary)}
 .cal-legend{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
 .cal-legend .lg{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--border)}
 .cal-legend .dot{width:10px;height:10px;border-radius:50%}
@@ -216,6 +224,7 @@ input[type="date"].form-control{min-height:42px}
   .cal-grid{gap:3px}
   .cal-cell{min-height:72px;padding:4px}
   .cal-chip{font-size:9px;padding:3px 5px}
+  #btnCalView{display:none !important}
   .btn{padding:8px 12px;font-size:12px}
   .modal{max-width:100%;margin:0 8px;max-height:85dvh}
   table{font-size:12px}
@@ -226,6 +235,24 @@ input[type="date"].form-control{min-height:42px}
   .quick-grid{grid-template-columns:repeat(3,1fr)}
   .stat-card{padding:12px}
 }
+
+.report-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:8px}
+.report-cat-title{grid-column:1/-1;font-size:14px;font-weight:800;color:var(--primary);margin:12px 0 4px;padding-bottom:6px;border-bottom:2px solid color-mix(in srgb,var(--primary) 20%,transparent)}
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,.04);display:flex;flex-direction:column;gap:8px}
+.report-card:hover{border-color:var(--primary-light);transform:translateY(-2px);box-shadow:var(--shadow)}
+.report-card .rc-id{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.4px}
+.report-card .rc-title{font-size:13.5px;font-weight:700;color:var(--text)}
+.report-card .rc-desc{font-size:12px;color:var(--text-secondary);line-height:1.45;flex:1}
+.report-card .rc-btn{align-self:flex-start;margin-top:4px}
+.iso-header{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;background:linear-gradient(180deg,#fff,var(--bg))}
+.iso-header .iso-title{font-size:16px;font-weight:800;color:var(--primary);text-align:center;padding:8px}
+.iso-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:12px;margin-top:8px}
+@media print{
+  .sidebar,.topbar,.bottom-nav,#moreSheet,.report-catalog,.card-header button,.nav{display:none!important}
+  .content{padding:0!important;overflow:visible!important}
+  #reportOutputCard{display:block!important;box-shadow:none;border:none}
+}
+
 </style>
 </head>
 <body>
@@ -287,10 +314,11 @@ input[type="date"].form-control{min-height:42px}
     </div>
     <div class="card">
       <div class="card-header"><h3>🚙 สถานะยานพาหนะ</h3><button class="btn btn-secondary btn-sm" onclick="showPage('vehicles')">ดูรถทั้งหมด</button></div>
-      <div class="card-body table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>สถานะ</th></tr></thead><tbody id="dashVehicles"></tbody></table></div>
+      <div class="card-body table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>ผู้ใช้ล่าสุด (ก่อนวันนี้)</th><th>สถานะ</th></tr></thead><tbody id="dashVehicles"></tbody></table></div>
     </div>
   </div>
 </section>
+
 <section class="page" id="page-booking">
   <div class="card"><div class="card-header"><h3>จองยานพาหนะ (4 ขั้นตอน)</h3></div>
   <div class="card-body">
@@ -312,6 +340,7 @@ input[type="date"].form-control{min-height:42px}
 <section class="page" id="page-calendar">
   <div class="card"><div class="card-header"><h3 id="calTitle">ปฏิทินจองรถยนต์</h3>
     <div class="cal-nav">
+      <button class="btn btn-secondary btn-sm" id="btnCalView" style="display:none">รายการ</button>
       <button class="btn btn-secondary btn-sm" onclick="calPrev()">‹</button>
       <button class="btn btn-secondary btn-sm" onclick="calToday()">วันนี้</button>
       <button class="btn btn-secondary btn-sm" onclick="calNext()">›</button>
@@ -320,6 +349,7 @@ input[type="date"].form-control{min-height:42px}
   <div class="card-body">
     <div class="cal-legend" id="calLegend"></div>
     <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-list" id="calList" style="display:none"></div>
   </div></div>
 </section>
 
@@ -372,8 +402,30 @@ input[type="date"].form-control{min-height:42px}
 </section>
 
 <section class="page" id="page-reports">
-  <div class="stats-grid" id="reportStats"></div>
-  <div class="card"><div class="card-header"><h3>สรุปการใช้งานตามแผนก</h3></div><div class="card-body" id="reportDept"></div></div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <div>
+        <h3>📋 รายงานระบบ (ISO/IEC 29110)</h3>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">OGA Fleet Management — Document Control & Operational Reports</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="printActiveReport()">🖨️ พิมพ์ / PDF</button>
+    </div>
+    <div class="card-body">
+      <div class="stats-grid" id="reportStats"></div>
+      <div class="report-catalog" id="reportCatalog"></div>
+    </div>
+  </div>
+  <div class="card" id="reportOutputCard" style="display:none">
+    <div class="card-header"><h3 id="reportOutputTitle">รายงาน</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-secondary btn-sm" onclick="exportReportWord()">📄 Word</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportReportExcel()">📊 Excel</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportReportPDF()">📑 PDF</button>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('reportOutputCard').style.display='none'">ปิด</button>
+      </div>
+    </div>
+    <div class="card-body" id="reportOutput"></div>
+  </div>
 </section>
 
 <section class="page" id="page-gps">
@@ -476,7 +528,7 @@ let state = {
   users:[], departments:[], drivers:[], vehicles:[], bookings:[], maintenance:[], masterItems:[],
   webAppUrl:'', sheetId:'', connected:false,
   calYear:new Date().getFullYear(), calMonth:new Date().getMonth(),
-  wizardStep:1, wizardData:{}
+  wizardStep:1, wizardData:{}, calView: null
 };
 
 const PLATE_COLORS = ['#0A6B89','#D97706','#059669','#7C3AED','#DC2626','#2563EB','#DB2777','#0891B2','#CA8A04','#4F46E5'];
@@ -927,11 +979,43 @@ function renderDashboard() {
       <td>${b.destination||''}</td><td>${b.start_date||''}</td><td>${statusBadge(b.status)}</td></tr>`
   ).join('') || '<tr><td colspan="6" class="empty-state">ยังไม่มีการจอง</td></tr>';
 
-  // Vehicles snapshot
-  document.getElementById('dashVehicles').innerHTML = state.vehicles.slice(0,6).map(v =>
-    `<tr style="cursor:pointer" onclick="showPage('vehicles')">
-      <td>${plateBadge(v.plate)}</td><td>${v.brand||''} ${v.model||''}</td><td>${statusBadge(v.status||'ว่าง')}</td></tr>`
-  ).join('') || '<tr><td colspan="3" class="empty-state">ยังไม่มีรถ</td></tr>';
+  // ยานพาหนะ + ผู้ใช้ล่าสุด (การจองก่อนวันนี้เท่านั้น)
+  document.getElementById('dashVehicles').innerHTML = state.vehicles.slice(0,8).map(v => {
+    const plate = v.plate || '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const related = state.bookings.filter(b => {
+      const match = String(b.plate||'') === String(plate) || String(b.VehicleID||'') === String(v.vehicle_id||'');
+      if (!match) return false;
+      const sd = String(b.start_date || b.DepartureDate || '').trim();
+      const p = sd.split(/[\/\-]/);
+      if (p.length < 3) return false;
+      let y = +p[2]; if (y > 2400) y -= 543;
+      const d = new Date(y, +p[1]-1, +p[0]);
+      return d < today; // ก่อนวันนี้เท่านั้น
+    });
+    related.sort((a,b) => {
+      const pa = String(a.start_date||'').split('/').reverse().join('');
+      const pb = String(b.start_date||'').split('/').reverse().join('');
+      return pb.localeCompare(pa); // ล่าสุดก่อน
+    });
+    const last = related[0];
+    let lastHtml = '<span style="color:var(--text-secondary);font-size:12px">— ยังไม่มีประวัติก่อนวันนี้</span>';
+    if (last) {
+      const t0 = (last.start_time||last.StartTime||'08:00').toString().substring(0,5);
+      const t1 = (last.end_time||last.EndTime||'17:00').toString().substring(0,5);
+      lastHtml = `<div style="font-size:12px;line-height:1.55">
+        <div><strong>📅 ${last.start_date||'-'}</strong> · 🕐 ${t0}–${t1}</div>
+        <div>👤 ${last.requester||last.Requester||'-'}</div>
+        <div>🏢 ${last.department||last.Department||'-'}</div>
+        <div>📍 ${last.destination||last.Destination||last.purpose||'-'}</div>
+      </div>`;
+    }
+    return `<tr style="cursor:pointer" onclick="showPage('vehicles')">
+      <td>${plateBadge(plate)}</td>
+      <td>${v.brand||''} ${v.model||''}</td>
+      <td>${lastHtml}</td>
+      <td>${statusBadge(v.status||'ว่าง')}</td></tr>`;
+  }).join('') || '<tr><td colspan="4" class="empty-state">ยังไม่มีรถ</td></tr>';
 
   const badge = document.getElementById('approveBadge');
   if (badge) { badge.style.display = pending ? 'inline' : 'none'; badge.textContent = pending; }
@@ -1018,17 +1102,324 @@ function renderMaintenance() {
   ).join('') : '<tr><td colspan="8" class="empty-state">ยังไม่มีข้อมูล</td></tr>';
 }
 function renderReports() {
-  const byDept={}; state.bookings.forEach(b=>{const d=b.department||'ไม่ระบุ'; byDept[d]=(byDept[d]||0)+1;});
-  document.getElementById('reportStats').innerHTML=`
+  const approved = state.bookings.filter(b => /อนุมัติแล้ว/.test(b.status||'') && !/รอ|ไม่/.test(b.status||'')).length;
+  const rejected = state.bookings.filter(b => /ไม่อนุมัติ|ยกเลิก/.test(b.status||'')).length;
+  const totalKm = state.vehicles.reduce((s,v)=>s+Number(v.mileage||0),0);
+  document.getElementById('reportStats').innerHTML = `
     <div class="stat-card"><div class="label">การจองทั้งหมด</div><div class="value">${state.bookings.length}</div></div>
-    <div class="stat-card"><div class="label">รถในระบบ</div><div class="value">${state.vehicles.length}</div></div>
-    <div class="stat-card"><div class="label">คนขับ</div><div class="value">${state.drivers.length}</div></div>
-    <div class="stat-card"><div class="label">ผู้ใช้</div><div class="value">${state.users.length}</div></div>`;
-  document.getElementById('reportDept').innerHTML = Object.keys(byDept).length
-    ? `<table><thead><tr><th>แผนก</th><th>จำนวนการจอง</th></tr></thead><tbody>
-        ${Object.entries(byDept).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</tbody></table>`
-    : '<div class="empty-state">ยังไม่มีข้อมูล</div>';
+    <div class="stat-card"><div class="label">อนุมัติแล้ว</div><div class="value" style="color:#2BB673">${approved}</div></div>
+    <div class="stat-card"><div class="label">ยกเลิก/ปฏิเสธ</div><div class="value" style="color:#E53E3E">${rejected}</div></div>
+    <div class="stat-card"><div class="label">เลขไมล์รวม (กม.)</div><div class="value" style="color:var(--primary)">${totalKm.toLocaleString()}</div></div>`;
+
+  const groups = [
+    {title:'1. รายงานการใช้ยานพาหนะและการจอง (Vehicle & Booking)', items:[
+      {id:'RPT-VB-01', title:'รายงานสรุปการใช้รถประจำเดือน/ปี', desc:'อัตราการถูกใช้งานของรถแต่ละคัน (วัน/%) — ดูคันไหนใช้งานหนักหรือจอดทิ้ง', fn:'vehicleUtilization'},
+      {id:'RPT-VB-02', title:'รายงานประวัติการจองแยกตามแผนก', desc:'จำนวนครั้งและระยะเวลาการจองของแต่ละฝ่าย เพื่อวิเคราะห์ความต้องการ', fn:'bookingsByDept'},
+      {id:'RPT-VB-03', title:'รายงานยกเลิกการจองและคำขอที่ถูกปฏิเสธ', desc:'สถิติการยกเลิก/ไม่อนุมัติ พร้อมรายละเอียดเพื่อปรับปรุงการจัดสรร', fn:'canceledRejected'},
+      {id:'RPT-VB-04', title:'รายงานช่วงเวลาการใช้งานหนาแน่น', desc:'วิเคราะห์วันและช่วงเวลาที่มีการขอใช้รถมากที่สุด (Peak Analysis)', fn:'peakHours'}
+    ]},
+    {title:'2. รายงานการใช้น้ำมันและระยะทาง (Fuel & Mileage)', items:[
+      {id:'RPT-FM-01', title:'รายงานสรุปเลขไมล์และระยะทางรวม', desc:'เลขไมล์ปัจจุบันของรถแต่ละคัน และประมาณการใช้งาน', fn:'totalMileage'},
+      {id:'RPT-FM-02', title:'รายงานอัตราสิ้นเปลืองน้ำมัน', desc:'ประมาณการประสิทธิภาพ (กม./ลิตร) เทียบมาตรฐาน — แจ้งคันที่ผิดปกติ', fn:'fuelEfficiency'},
+      {id:'RPT-FM-03', title:'รายงานค่าใช้จ่ายน้ำมันเชื้อเพลิง', desc:'สรุปค่าใช้จ่ายน้ำมันโดยประมาณ แยกตามคัน/แผนก', fn:'fuelCost'}
+    ]},
+    {title:'3. รายงานการบำรุงรักษาและความปลอดภัย (Maintenance & Safety)', items:[
+      {id:'RPT-MS-01', title:'รายงานประวัติการซ่อมบำรุงและตรวจเช็กระยะ', desc:'รายการเข้าศูนย์ เปลี่ยนอะไหล่ และค่าใช้จ่ายซ่อมของรถแต่ละคัน', fn:'maintHistory'},
+      {id:'RPT-MS-02', title:'รายงานเตือนการบำรุงรักษาครั้งถัดไป', desc:'รถที่ใกล้ถึงกำหนดเช็กระยะตามรอบกิโลเมตรหรือรอบเวลา', fn:'upcomingMaint'},
+      {id:'RPT-MS-03', title:'รายงานสถานะภาษี พ.ร.บ. และประกันภัย', desc:'ติดตามวันหมดอายุเอกสารสำคัญประจำรถ', fn:'taxInsurance'}
+    ]},
+    {title:'4. รายงานพนักงานขับรถและประสิทธิภาพ (Driver Performance)', items:[
+      {id:'RPT-DR-01', title:'รายงานตารางงานและชั่วโมงการทำงานของ Driver', desc:'สรุปภารกิจของพนักงานขับรถแต่ละคน เพื่อกระจายงานอย่างเป็นธรรม', fn:'driverWorkload'},
+      {id:'RPT-DR-02', title:'รายงานการประเมินความพึงพอใจการใช้บริการ', desc:'คะแนนเรตติ้งและความพึงพอใจจากผู้ใช้บริการหลังจบงาน', fn:'driverRating'}
+    ]}
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    html += `<div class="report-cat-title">${g.title}</div>`;
+    g.items.forEach(it => {
+      html += `<div class="report-card" onclick="generateReport('${it.fn}','${it.id}')">
+        <div class="rc-id">${it.id}</div>
+        <div class="rc-title">${it.title}</div>
+        <div class="rc-desc">${it.desc}</div>
+        <button class="btn btn-primary btn-sm rc-btn" type="button">สร้างรายงาน</button>
+      </div>`;
+    });
+  });
+  const cat = document.getElementById('reportCatalog');
+  if (cat) cat.innerHTML = html;
 }
+
+function isoReportHeader(docId, title) {
+  const now = new Date();
+  const ds = String(now.getDate()).padStart(2,'0') + '/' + String(now.getMonth()+1).padStart(2,'0') + '/' + (now.getFullYear()+543);
+  return `<div class="iso-header">
+    <div class="iso-title">OGA INTERNATIONAL CO., LTD.</div>
+    <div style="text-align:center;font-size:13px;font-weight:700;margin-bottom:8px">${title}</div>
+    <div class="iso-meta">
+      <div><strong>Document ID:</strong> ${docId}</div>
+      <div><strong>Standard:</strong> ISO/IEC 29110 (VSE Profile)</div>
+      <div><strong>Version:</strong> 1.0</div>
+      <div><strong>Generated:</strong> ${ds}</div>
+      <div><strong>System:</strong> OGA Fleet v3.3</div>
+      <div><strong>Classification:</strong> Internal Use</div>
+      <div><strong>Prepared by:</strong> Fleet System (Auto)</div>
+      <div><strong>Approved by:</strong> ________________</div>
+    </div>
+  </div>`;
+}
+
+function showReport(docId, title, bodyHtml) {
+  document.getElementById('reportOutputTitle').textContent = docId + ' — ' + title;
+  document.getElementById('reportOutput').innerHTML = isoReportHeader(docId, title) + bodyHtml;
+  document.getElementById('reportOutputCard').style.display = 'block';
+  document.getElementById('reportOutputCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+const REPORT_TITLES = {
+  vehicleUtilization:'รายงานสรุปการใช้รถประจำเดือน/ปี',
+  bookingsByDept:'รายงานประวัติการจองแยกตามแผนก',
+  canceledRejected:'รายงานยกเลิกการจองและคำขอที่ถูกปฏิเสธ',
+  peakHours:'รายงานช่วงเวลาการใช้งานหนาแน่น',
+  totalMileage:'รายงานสรุปเลขไมล์และระยะทางรวม',
+  fuelEfficiency:'รายงานอัตราสิ้นเปลืองน้ำมัน',
+  fuelCost:'รายงานค่าใช้จ่ายน้ำมันเชื้อเพลิง',
+  maintHistory:'รายงานประวัติการซ่อมบำรุงและตรวจเช็กระยะ',
+  upcomingMaint:'รายงานเตือนการบำรุงรักษาครั้งถัดไป',
+  taxInsurance:'รายงานสถานะภาษี พ.ร.บ. และประกันภัย',
+  driverWorkload:'รายงานตารางงานและชั่วโมงการทำงานของ Driver',
+  driverRating:'รายงานการประเมินความพึงพอใจการใช้บริการ'
+};
+
+function generateReport(fn, docId) {
+  const title = REPORT_TITLES[fn] || fn;
+  const map = { vehicleUtilization, bookingsByDept, canceledRejected, peakHours, totalMileage, fuelEfficiency, fuelCost, maintHistory, upcomingMaint, taxInsurance, driverWorkload, driverRating };
+  if (map[fn]) map[fn](docId, title);
+  else toast('ยังไม่รองรับรายงานนี้','error');
+}
+
+function vehicleUtilization(docId, title) {
+  const daysInMonth = 30;
+  const rows = state.vehicles.map(v => {
+    const bks = state.bookings.filter(b => b.plate === v.plate && /อนุมัติ|คืนรถ/.test(b.status||''));
+    const used = bks.length;
+    const pct = Math.min(100, Math.round((used / daysInMonth) * 100));
+    return `<tr><td>${plateBadge(v.plate)}</td><td>${v.brand||''} ${v.model||''}</td><td>${used}</td><td>${pct}%</td>
+      <td><div style="background:#E2E8F0;border-radius:6px;height:10px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent))"></div></div></td></tr>`;
+  }).join('') || '<tr><td colspan="5">ไม่มีข้อมูล</td></tr>';
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>วันใช้งาน (ครั้ง)</th><th>อัตรา %</th><th>Utilization</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-top:12px">หมายเหตุ: คำนวณจากจำนวนครั้งที่อนุมัติ/คืนรถ เทียบฐาน ${daysInMonth} วัน</p>`);
+}
+
+function bookingsByDept(docId, title) {
+  const by = {};
+  state.bookings.forEach(b => {
+    const d = b.department || 'ไม่ระบุ';
+    if (!by[d]) by[d] = {count:0, approved:0, pending:0, rejected:0};
+    by[d].count++;
+    if (/อนุมัติแล้ว/.test(b.status||'') && !/ไม่/.test(b.status||'')) by[d].approved++;
+    else if (b.status==='รออนุมัติ') by[d].pending++;
+    else if (/ไม่อนุมัติ|ยกเลิก/.test(b.status||'')) by[d].rejected++;
+  });
+  const rows = Object.entries(by).map(([d,v]) =>
+    `<tr><td>${d}</td><td>${v.count}</td><td>${v.approved}</td><td>${v.pending}</td><td>${v.rejected}</td></tr>`
+  ).join('') || '<tr><td colspan="5">ไม่มีข้อมูล</td></tr>';
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>แผนก</th><th>จองทั้งหมด</th><th>อนุมัติ</th><th>รอ</th><th>ปฏิเสธ/ยกเลิก</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+}
+
+function canceledRejected(docId, title) {
+  const list = state.bookings.filter(b => /ไม่อนุมัติ|ยกเลิก/.test(b.status||''));
+  const rows = list.map(b =>
+    `<tr><td>${b.booking_id||''}</td><td>${plateBadge(b.plate)}</td><td>${b.requester||''}</td><td>${b.department||''}</td>
+     <td>${b.start_date||''}</td><td>${statusBadge(b.status)}</td><td>${b.notes||b.purpose||'-'}</td></tr>`
+  ).join('') || '<tr><td colspan="7" class="empty-state">ไม่มีรายการยกเลิก/ปฏิเสธ</td></tr>';
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>รหัส</th><th>รถ</th><th>ผู้ขอ</th><th>แผนก</th><th>วันที่</th><th>สถานะ</th><th>หมายเหตุ</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p style="font-size:12px;margin-top:10px">รวม <strong>${list.length}</strong> รายการ</p>`);
+}
+
+function peakHours(docId, title) {
+  const byDay = {}, byHour = {};
+  state.bookings.forEach(b => {
+    byDay[b.start_date||'-'] = (byDay[b.start_date||'-']||0)+1;
+    const h = (b.start_time||'08:00').toString().substring(0,2);
+    byHour[h] = (byHour[h]||0)+1;
+  });
+  const dayRows = Object.entries(byDay).sort((a,b)=>b[1]-a[1]).slice(0,15)
+    .map(([d,c])=>`<tr><td>${d}</td><td>${c}</td></tr>`).join('') || '<tr><td colspan="2">-</td></tr>';
+  const hourRows = Object.entries(byHour).sort((a,b)=>a[0].localeCompare(b[0]))
+    .map(([h,c])=>`<tr><td>${h}:00</td><td>${c}</td></tr>`).join('') || '<tr><td colspan="2">-</td></tr>';
+  showReport(docId, title, `<div class="dash-grid"><div><h4 style="margin-bottom:8px">วันที่จองหนาแน่น (Top 15)</h4>
+    <div class="table-wrap"><table><thead><tr><th>วันที่</th><th>จำนวน</th></tr></thead><tbody>${dayRows}</tbody></table></div></div>
+    <div><h4 style="margin-bottom:8px">ช่วงเวลาออกเดินทาง</h4>
+    <div class="table-wrap"><table><thead><tr><th>ชั่วโมง</th><th>จำนวน</th></tr></thead><tbody>${hourRows}</tbody></table></div></div></div>`);
+}
+
+function totalMileage(docId, title) {
+  const rows = state.vehicles.map(v =>
+    `<tr><td>${plateBadge(v.plate)}</td><td>${v.brand||''} ${v.model||''}</td><td>${Number(v.mileage||0).toLocaleString()} กม.</td><td>${v.status||'-'}</td></tr>`
+  ).join('') || '<tr><td colspan="4">ไม่มีข้อมูล</td></tr>';
+  const sum = state.vehicles.reduce((s,v)=>s+Number(v.mileage||0),0);
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>เลขไมล์ปัจจุบัน</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p style="margin-top:10px;font-weight:700">รวมระยะทางในระบบ: ${sum.toLocaleString()} กม.</p>`);
+}
+
+function fuelEfficiency(docId, title) {
+  const std = 12;
+  const rows = state.vehicles.map(v => {
+    const km = Number(v.mileage||0);
+    const estL = km > 0 ? (km / std) : 0;
+    const status = km > 80000 ? '<span class="badge badge-warning">ควรตรวจเช็ก</span>' : '<span class="badge badge-success">ปกติ</span>';
+    return `<tr><td>${plateBadge(v.plate)}</td><td>${v.brand||''} ${v.model||''}</td><td>${km.toLocaleString()}</td>
+      <td>~${std} กม./ลิตร</td><td>~${estL.toFixed(0)} ลิตร (สะสม)</td><td>${status}</td></tr>`;
+  }).join('') || '<tr><td colspan="6">ไม่มีข้อมูล</td></tr>';
+  showReport(docId, title, `<p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">ประมาณการจากมาตรฐานรถเก๋ง ${std} กม./ลิตร</p>
+    <div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>เลขไมล์</th><th>มาตรฐาน</th><th>น้ำมันสะสมโดยประมาณ</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+}
+
+function fuelCost(docId, title) {
+  const price = 35, std = 12;
+  const rows = state.vehicles.map(v => {
+    const km = Number(v.mileage||0);
+    const cost = km > 0 ? Math.round((km/std)*price) : 0;
+    return `<tr><td>${plateBadge(v.plate)}</td><td>${v.brand||''} ${v.model||''}</td><td>${km.toLocaleString()}</td><td>${cost.toLocaleString()} บาท</td></tr>`;
+  }).join('') || '<tr><td colspan="4">ไม่มีข้อมูล</td></tr>';
+  const total = state.vehicles.reduce((s,v)=>{const km=Number(v.mileage||0);return s+(km>0?Math.round((km/std)*price):0);},0);
+  showReport(docId, title, `<p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">ประมาณการที่ราคาน้ำมัน ${price} บาท/ลิตร · ${std} กม./ลิตร</p>
+    <div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>เลขไมล์</th><th>ค่าน้ำมันสะสม (ประมาณ)</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p style="margin-top:10px;font-weight:700">รวมประมาณการ: ${total.toLocaleString()} บาท</p>`);
+}
+
+function maintHistory(docId, title) {
+  const rows = state.maintenance.map(m =>
+    `<tr><td>${m.maint_id||''}</td><td>${plateBadge(m.plate)}</td><td>${m.type||''}</td><td>${m.date||''}</td>
+     <td>${Number(m.cost||0).toLocaleString()} บาท</td><td>${m.next_due||'-'}</td><td>${statusBadge(m.status)}</td></tr>`
+  ).join('') || '<tr><td colspan="7" class="empty-state">ยังไม่มีประวัติบำรุงรักษา</td></tr>';
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>รหัส</th><th>ทะเบียน</th><th>ประเภท</th><th>วันที่</th><th>ค่าใช้จ่าย</th><th>ครั้งถัดไป</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+}
+
+function upcomingMaint(docId, title) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = state.maintenance.filter(m => {
+    const s = String(m.next_due||'');
+    const p = s.split(/[\\/\\-]/);
+    if (p.length < 3) return true;
+    let y=+p[2]; if(y>2400)y-=543;
+    const d = new Date(y, +p[1]-1, +p[0]);
+    return ((d - today) / 86400000) <= 60;
+  });
+  const rows = (upcoming.length ? upcoming : state.maintenance).map(m =>
+    `<tr><td>${plateBadge(m.plate)}</td><td>${m.type||''}</td><td>${m.next_due||'ไม่ระบุ'}</td><td>${Number(m.cost||0).toLocaleString()}</td><td>${statusBadge(m.status)}</td></tr>`
+  ).join('') || '<tr><td colspan="5" class="empty-state">ไม่มีรายการใกล้กำหนด</td></tr>';
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>ประเภท</th><th>กำหนดถัดไป</th><th>ค่าใช้จ่ายล่าสุด</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p style="font-size:12px;margin-top:10px;color:var(--text-secondary)">แสดงรายการที่กำหนดภายใน 60 วัน หรือยังไม่ระบุวันที่</p>`);
+}
+
+function taxInsurance(docId, title) {
+  const rows = state.vehicles.map(v =>
+    `<tr><td>${plateBadge(v.plate)}</td><td>${v.brand||''} ${v.model||''}</td>
+     <td>${v.tax_expire||v.TaxExpire||'—'}</td>
+     <td>${v.insurance_expire||v.InsuranceExpire||'—'}</td>
+     <td>${v.prb_expire||v.PRBExpire||'—'}</td>
+     <td>${statusBadge(v.status||'ว่าง')}</td></tr>`
+  ).join('') || '<tr><td colspan="6">ไม่มีข้อมูล</td></tr>';
+  showReport(docId, title, `<p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">กรอกวันหมดอายุภาษี/ประกันในข้อมูลรถ เพื่อติดตามในรายงานนี้</p>
+    <div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>ภาษี</th><th>ประกันภัย</th><th>พ.ร.บ.</th><th>สถานะรถ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+}
+
+function driverWorkload(docId, title) {
+  const rows = state.drivers.map(d => {
+    const jobs = state.bookings.filter(b => b.driver_id === d.driver_id || b.driver_name === d.name);
+    const approved = jobs.filter(b => /อนุมัติ|คืนรถ/.test(b.status||'')).length;
+    return `<tr><td>${d.name||''}</td><td>${d.phone||''}</td><td>${jobs.length}</td><td>${approved}</td>
+      <td>⭐ ${d.rating||'-'}</td><td>${statusBadge(d.status)}</td></tr>`;
+  }).join('') || '<tr><td colspan="6">ไม่มีข้อมูลคนขับ</td></tr>';
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>ชื่อ</th><th>โทร</th><th>งานทั้งหมด</th><th>งานที่อนุมัติ/เสร็จ</th><th>เรตติ้ง</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+}
+
+function driverRating(docId, title) {
+  const rows = state.drivers.map(d => {
+    const r = Number(d.rating||0);
+    const stars = '⭐'.repeat(Math.min(5, Math.round(r))) || '-';
+    return `<tr><td>${d.name||''}</td><td>${stars}</td><td>${r||'-'}</td><td>${d.license_no||'-'}</td><td>${d.license_expire||'-'}</td><td>${statusBadge(d.status)}</td></tr>`;
+  }).join('') || '<tr><td colspan="6">ไม่มีข้อมูล</td></tr>';
+  showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>คนขับ</th><th>คะแนน</th><th>เรตติ้ง</th><th>ใบขับขี่</th><th>หมดอายุ</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+}
+
+function printActiveReport() {
+  const card = document.getElementById('reportOutputCard');
+  if (!card || card.style.display === 'none') { toast('กรุณาเลือกรายงานก่อน','error'); return; }
+  window.print();
+}
+
+function getReportExportMeta() {
+  const title = (document.getElementById('reportOutputTitle') || {}).textContent || 'OGA_Report';
+  const body = document.getElementById('reportOutput');
+  if (!body || !body.innerHTML.trim()) return null;
+  return { title: title.replace(/[\\/:*?"<>|]/g, '_'), html: body.innerHTML, el: body };
+}
+
+function exportReportWord() {
+  const meta = getReportExportMeta();
+  if (!meta) { toast('กรุณาสร้างรายงานก่อน','error'); return; }
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>${meta.title}</title>
+    <style>
+      body{font-family:'TH Sarabun New',Tahoma,sans-serif;font-size:14pt;color:#1A202C}
+      table{border-collapse:collapse;width:100%;margin-top:12px}
+      th,td{border:1px solid #CBD5E0;padding:6px 10px;text-align:left;font-size:12pt}
+      th{background:#EBF0F5}
+      .iso-header{border:1px solid #E2E8F0;padding:12px;margin-bottom:16px}
+      .iso-title{font-size:18pt;font-weight:bold;text-align:center;color:#0A6B89}
+      .iso-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:11pt}
+      .badge,.plate-badge{display:inline-block;padding:2px 8px;border-radius:6px;background:#EDF2F7}
+    </style></head><body>${meta.html}</body></html>`;
+  const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = meta.title + '.doc';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('ส่งออก Word แล้ว');
+}
+
+function exportReportExcel() {
+  const meta = getReportExportMeta();
+  if (!meta) { toast('กรุณาสร้างรายงานก่อน','error'); return; }
+  const table = meta.el.querySelector('table');
+  let csv = '';
+  // title rows
+  csv += '"' + meta.title.replace(/"/g,'""') + '"\n';
+  csv += '"OGA International — ISO/IEC 29110"\n\n';
+  if (table) {
+    table.querySelectorAll('tr').forEach(tr => {
+      const cells = [...tr.querySelectorAll('th,td')].map(td => {
+        let t = (td.innerText || td.textContent || '').replace(/\s+/g,' ').trim();
+        t = t.replace(/"/g, '""');
+        return '"' + t + '"';
+      });
+      csv += cells.join(',') + '\n';
+    });
+  } else {
+    csv += '"' + (meta.el.innerText || '').replace(/"/g,'""').replace(/\n/g,' ') + '"\n';
+  }
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = meta.title + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('ส่งออก Excel (CSV) แล้ว');
+}
+
+function exportReportPDF() {
+  const meta = getReportExportMeta();
+  if (!meta) { toast('กรุณาสร้างรายงานก่อน','error'); return; }
+  // ใช้หน้าพิมพ์ของเบราว์เซอร์ → Save as PDF
+  toast('เลือก "Save as PDF" ในหน้าต่างพิมพ์');
+  setTimeout(() => window.print(), 300);
+}
+
+
 
 /** รายการที่วันกลับ (หรือวันออก) เลยวันนี้แล้ว → ไม่แสดงในปฏิทิน */
 function isBookingPast(b) {
@@ -1141,6 +1532,73 @@ function renderCalendar() {
     html += `<div class="cal-cell other"><div class="day-num">${i}</div></div>`;
   }
   document.getElementById('calGrid').innerHTML = html;
+  renderCalList(monthBookings);
+  // PC = grid เสมอ | PDA/มือถือ = list เสมอ
+  state.calView = (window.innerWidth <= 900) ? 'list' : 'grid';
+  applyCalView();
+}
+function parseBookingSortKey(b) {
+  const s = String(b.start_date || b.DepartureDate || '');
+  const p = s.split(/[\/\-]/);
+  if (p.length >= 3) {
+    let y = +p[2]; if (y > 2400) y -= 543;
+    return `${y}${String(p[1]).padStart(2,'0')}${String(p[0]).padStart(2,'0')}`;
+  }
+  return s;
+}
+function renderCalList(monthBookings) {
+  const list = document.getElementById('calList');
+  if (!list) return;
+  // แสดงรายการทั้งเดือน + ที่ยังไม่เลยวัน เรียงวันที่
+  let items = (monthBookings || state.bookings.filter(b => !isBookingPast(b))).slice();
+  items.sort((a,b) => parseBookingSortKey(a).localeCompare(parseBookingSortKey(b)));
+  if (!items.length) {
+    list.innerHTML = '<div class="cal-list-empty">ไม่มีรายการจองในช่วงนี้</div>';
+    return;
+  }
+  list.innerHTML = items.map(b => {
+    const st = String(b.status || '');
+    let border = plateColor(b.plate);
+    if (/อนุมัติแล้ว/.test(st) && !/รอ|ไม่/.test(st)) border = '#2BB673';
+    else if (/ไม่อนุมัติ|ยกเลิก/.test(st)) border = '#E53E3E';
+    else if (/คืนรถ/.test(st)) border = '#718096';
+    const tStart = (b.start_time || b.StartTime || '08:00').toString().substring(0,5);
+    const tEnd = (b.end_time || b.EndTime || '17:00').toString().substring(0,5);
+    return `<div class="cal-list-item" style="border-left-color:${border}" onclick="showPage('approvals')">
+      <div class="cli-top">
+        <span class="cli-date">📅 ${b.start_date||'-'}${b.end_date && b.end_date!==b.start_date ? ' → '+b.end_date : ''}</span>
+        ${statusBadge(b.status)}
+      </div>
+      <div class="cli-row">
+        <span>${plateBadge(b.plate)}</span>
+        <span>👤 ${b.requester||'-'}</span>
+        <span>🏢 ${b.department||'-'}</span>
+      </div>
+      <div class="cli-row">
+        <span>📍 ${b.destination||b.purpose||'-'}</span>
+        <span>🕐 ${tStart} – ${tEnd}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+function applyCalView() {
+  const isMobile = window.innerWidth <= 900;
+  const view = isMobile ? 'list' : 'grid';
+  state.calView = view;
+  const grid = document.getElementById('calGrid');
+  const list = document.getElementById('calList');
+  const btn = document.getElementById('btnCalView');
+  if (view === 'list') {
+    if (grid) grid.style.display = 'none';
+    if (list) list.style.display = 'flex';
+  } else {
+    if (grid) grid.style.display = 'grid';
+    if (list) list.style.display = 'none';
+  }
+  if (btn) btn.style.display = 'none';
+}
+function toggleCalView() {
+  applyCalView();
 }
 function calPrev(){state.calMonth--;if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();}
 function calNext(){state.calMonth++;if(state.calMonth>11){state.calMonth=0;state.calYear++;}renderCalendar();}
