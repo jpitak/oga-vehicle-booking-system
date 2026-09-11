@@ -127,9 +127,9 @@ button,input,select,textarea{font-family:inherit}
 .quick-card.qc-4{background:linear-gradient(160deg,#EBF8FF,#63B3ED)}
 .quick-card.qc-5{background:linear-gradient(160deg,#FFFFF0,#F6E05E)}
 .quick-card.qc-6{background:linear-gradient(160deg,#EBF4FF,#7F9CF5)}
-.dash-chart-card{position:relative;overflow:hidden}
-.dash-chart-card .wave-bg{position:absolute;right:0;top:0;bottom:0;width:48%;background:linear-gradient(135deg,#0A2540 0%,#1A365D 40%,#2B6CB0 100%);opacity:.95;border-radius:0 var(--radius) var(--radius) 0}
-.dash-chart-card .wave-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Cpath d='M0 100 Q50 50 100 100 T200 100 T300 100 T400 100' fill='none' stroke='rgba(99,179,237,0.5)' stroke-width='2'/%3E%3Cpath d='M0 120 Q50 70 100 120 T200 120 T300 120 T400 120' fill='none' stroke='rgba(237,100,166,0.4)' stroke-width='2'/%3E%3Cpath d='M0 80 Q50 30 100 80 T200 80 T300 80 T400 80' fill='none' stroke='rgba(129,230,217,0.45)' stroke-width='2'/%3E%3C/svg%3E") center/cover no-repeat}
+.dash-chart-card{position:relative;overflow:hidden;background:linear-gradient(135deg,#FFFFFF 0%,#F7FAFC 60%,#EDF2F7 100%);border:1px solid var(--border)}
+.dash-chart-card .wave-bg{display:none!important}
+
 .dash-chart-card .card-body{position:relative;z-index:1}
 .row-tint-ok{background:linear-gradient(90deg,#F0FFF4,transparent)}
 .row-tint-wait{background:linear-gradient(90deg,#FFFAF0,transparent)}
@@ -281,6 +281,16 @@ input[type="date"].form-control{min-height:42px}
   #reportOutputCard{display:block!important;box-shadow:none;border:none}
 }
 
+
+.donut-panel{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;width:100%}
+@media(max-width:700px){.donut-panel{grid-template-columns:1fr;justify-items:center}}
+.kpi-pills{display:flex;flex-direction:column;gap:10px;min-width:140px}
+.kpi-pill{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.kpi-pill .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.kpi-pill .kpi-label{font-size:12px;color:var(--text-secondary);flex:1}
+.kpi-pill .kpi-val{font-size:16px;font-weight:800}
+.radar-soft{width:160px;height:160px;flex-shrink:0}
+.radar-soft svg{width:100%;height:100%;filter:drop-shadow(0 4px 12px rgba(10,107,137,.1))}
 </style>
 </head>
 <body>
@@ -327,7 +337,6 @@ input[type="date"].form-control{min-height:42px}
   <div class="quick-grid" id="dashQuick"></div>
   <div class="dash-grid">
     <div class="card dash-chart-card">
-      <div class="wave-bg" aria-hidden="true"></div>
       <div class="card-header" style="position:relative;z-index:1"><h3>📊 สถานะการจอง</h3><button class="btn btn-secondary btn-sm" onclick="showPage('approvals')">ดูอนุมัติ</button></div>
       <div class="card-body"><div class="donut-wrap" id="dashDonut"></div></div>
     </div>
@@ -365,7 +374,6 @@ input[type="date"].form-control{min-height:42px}
     </div>
   </div></div>
 </section>
-
 <section class="page" id="page-calendar">
   <div class="card"><div class="card-header"><h3 id="calTitle">ปฏิทินจองรถยนต์</h3>
     <div class="cal-nav">
@@ -491,7 +499,6 @@ input[type="date"].form-control{min-height:42px}
     <p style="font-size:12px;color:var(--text-secondary);margin-top:8px">หาก Refresh แล้วยังไม่เชื่อมต่อ กด <b>บันทึกการตั้งค่า</b> แล้ว <b>ดึงข้อมูลทั้งหมด</b> อีกครั้ง — ระบบจำ URL ในเครื่องอัตโนมัติ</p>
   </div></div>
 </section>
-
 <section class="page" id="page-settings">
   <div class="card"><div class="card-header"><h3>🎨 ธีม 3D / Glassmorphism (15 โทน)</h3></div>
   <div class="card-body">
@@ -511,7 +518,6 @@ input[type="date"].form-control{min-height:42px}
 </section>
 
 </div></div>
-
 
 <nav class="bottom-nav" id="bottomNav">
   <button type="button" class="bn-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="bni">📊</span>หน้าหลัก</button>
@@ -743,7 +749,6 @@ async function initSheets() {
     toast(data.message || 'สำเร็จ');
   } catch(err) { hideLoading(); toast('Error: '+err.message,'error'); }
 }
-
 async function syncAllData() {
   showLoading('กำลังดึงข้อมูลจาก Google Sheet...');
   try {
@@ -999,12 +1004,38 @@ function renderDashboard() {
   const p1 = (a/sum)*100, p2 = (p/sum)*100, p3 = (r/sum)*100, p4 = (t/sum)*100;
   const g = `conic-gradient(#2BB673 0% ${p1}%, #FFB300 ${p1}% ${p1+p2}%, #E53E3E ${p1+p2}% ${p1+p2+p3}%, #718096 ${p1+p2+p3}% 100%)`;
   document.getElementById('dashDonut').innerHTML = `
-    <div class="donut" style="background:${g}"><div class="donut-center"><strong>${totalBk}</strong><span>ทั้งหมด</span></div></div>
-    <div class="legend-list">
-      <div class="row"><span class="sw" style="background:#2BB673"></span>อนุมัติแล้ว <strong style="margin-left:auto">${a}</strong></div>
-      <div class="row"><span class="sw" style="background:#FFB300"></span>รออนุมัติ <strong style="margin-left:auto">${p}</strong></div>
-      <div class="row"><span class="sw" style="background:#E53E3E"></span>ไม่อนุมัติ <strong style="margin-left:auto">${r}</strong></div>
-      <div class="row"><span class="sw" style="background:#718096"></span>คืนรถแล้ว <strong style="margin-left:auto">${t}</strong></div>
+    <div class="donut-panel">
+      <div class="donut" style="background:${g}"><div class="donut-center"><strong>${totalBk}</strong><span>ทั้งหมด</span></div></div>
+      <div class="kpi-pills">
+        <div class="kpi-pill"><span class="dot" style="background:#2BB673"></span><span class="kpi-label">อนุมัติแล้ว</span><span class="kpi-val" style="color:#276749">${a}</span></div>
+        <div class="kpi-pill"><span class="dot" style="background:#FFB300"></span><span class="kpi-label">รออนุมัติ</span><span class="kpi-val" style="color:#C05621">${p}</span></div>
+        <div class="kpi-pill"><span class="dot" style="background:#E53E3E"></span><span class="kpi-label">ไม่อนุมัติ</span><span class="kpi-val" style="color:#C53030">${r}</span></div>
+        <div class="kpi-pill"><span class="dot" style="background:#A0AEC0"></span><span class="kpi-label">คืนรถแล้ว</span><span class="kpi-val" style="color:#4A5568">${t}</span></div>
+      </div>
+      <div class="radar-soft" title="ภาพรวมประสิทธิภาพการจอง">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="rg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38C172" stop-opacity=".35"/><stop offset="100%" stop-color="#0A6B89" stop-opacity=".2"/></linearGradient>
+            <linearGradient id="rg2" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFB300" stop-opacity=".4"/><stop offset="100%" stop-color="#FF8C00" stop-opacity=".15"/></linearGradient>
+          </defs>
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+          <circle cx="100" cy="100" r="52" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+          <circle cx="100" cy="100" r="34" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+          <circle cx="100" cy="100" r="16" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+          <line x1="100" y1="30" x2="100" y2="170" stroke="#E2E8F0"/><line x1="30" y1="100" x2="170" y2="100" stroke="#E2E8F0"/>
+          <line x1="45" y1="45" x2="155" y2="155" stroke="#EDF2F7"/><line x1="155" y1="45" x2="45" y2="155" stroke="#EDF2F7"/>
+          <polygon points="100,40 150,75 135,140 65,140 50,75" fill="url(#rg1)" stroke="#0A6B89" stroke-width="1.5" opacity=".9"/>
+          <polygon points="100,55 130,85 120,130 80,130 70,85" fill="url(#rg2)" stroke="#FF8C00" stroke-width="1.5" opacity=".85"/>
+          <circle cx="100" cy="40" r="3.5" fill="#0A6B89"/><circle cx="150" cy="75" r="3.5" fill="#38C172"/>
+          <circle cx="135" cy="140" r="3.5" fill="#718096"/><circle cx="65" cy="140" r="3.5" fill="#E53E3E"/>
+          <circle cx="50" cy="75" r="3.5" fill="#FFB300"/>
+          <text x="100" y="22" text-anchor="middle" font-size="8" fill="#718096" font-family="system-ui">ความพร้อม</text>
+          <text x="168" y="78" text-anchor="start" font-size="7.5" fill="#718096" font-family="system-ui">อนุมัติ</text>
+          <text x="140" y="158" text-anchor="middle" font-size="7.5" fill="#718096" font-family="system-ui">คืนรถ</text>
+          <text x="60" y="158" text-anchor="middle" font-size="7.5" fill="#718096" font-family="system-ui">ปฏิเสธ</text>
+          <text x="28" y="78" text-anchor="end" font-size="7.5" fill="#718096" font-family="system-ui">รอคิว</text>
+        </svg>
+      </div>
     </div>`;
 
   // 7-day bar chart
@@ -1326,7 +1357,6 @@ function totalMileage(docId, title) {
   showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>เลขไมล์ปัจจุบัน</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p style="margin-top:10px;font-weight:700">รวมระยะทางในระบบ: ${sum.toLocaleString()} กม.</p>`);
 }
-
 function fuelEfficiency(docId, title) {
   const std = 12;
   const rows = state.vehicles.map(v => {
@@ -1389,7 +1419,6 @@ function taxInsurance(docId, title) {
   showReport(docId, title, `<p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">กรอกวันหมดอายุภาษี/ประกันในข้อมูลรถ เพื่อติดตามในรายงานนี้</p>
     <div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>ภาษี</th><th>ประกันภัย</th><th>พ.ร.บ.</th><th>สถานะรถ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
-
 function driverWorkload(docId, title) {
   const rows = state.drivers.map(d => {
     const jobs = state.bookings.filter(b => b.driver_id === d.driver_id || b.driver_name === d.name);
@@ -1436,7 +1465,18 @@ function exportReportWord() {
       .iso-title{font-size:18pt;font-weight:bold;text-align:center;color:#0A6B89}
       .iso-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;font-size:11pt}
       .badge,.plate-badge{display:inline-block;padding:2px 8px;border-radius:6px;background:#EDF2F7}
-    </style></head><body>${meta.html}</body></html>`;
+    
+.donut-panel{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;width:100%}
+@media(max-width:700px){.donut-panel{grid-template-columns:1fr;justify-items:center}}
+.kpi-pills{display:flex;flex-direction:column;gap:10px;min-width:140px}
+.kpi-pill{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.kpi-pill .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.kpi-pill .kpi-label{font-size:12px;color:var(--text-secondary);flex:1}
+.kpi-pill .kpi-val{font-size:16px;font-weight:800}
+.radar-soft{width:160px;height:160px;flex-shrink:0}
+.radar-soft svg{width:100%;height:100%;filter:drop-shadow(0 4px 12px rgba(10,107,137,.1))}
+
+</style></head><body>${meta.html}</body></html>`;
   const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1482,7 +1522,6 @@ function exportReportPDF() {
   toast('เลือก "Save as PDF" ในหน้าต่างพิมพ์');
   setTimeout(() => window.print(), 300);
 }
-
 
 
 /** รายการที่วันกลับ (หรือวันออก) เลยวันนี้แล้ว → ไม่แสดงในปฏิทิน */
