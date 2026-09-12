@@ -556,7 +556,7 @@ input[type="date"].form-control{min-height:42px}
 <script>
 const STORAGE_KEY = 'oga_fleet_v33_cfg';
 const THEME_KEY = 'oga_fleet_v31_theme';
-const DEFAULT_WEBAPP = 'https://script.google.com/macros/s/AKfycbx2zawd8M3YMO59wBUBPRIUpsF4RsWoZ9qjEUSS3g9gvOkUjylDJIy-Z9Vzu2iqNX8/exec';
+const DEFAULT_WEBAPP = 'https://script.google.com/macros/s/AKfycbyS4l82N6yefDOgmrw2Rhf_E4OCn8-1_zdbTnDBJc9gHa0HQ2K1_OxZ--IIex08gn2X/exec';
 const DEFAULT_SHEET = '1lVnrFrlhKWyZiUml_5vXSsFpjhGo_A1KOfFP4X92Z9E';
 
 let state = {
@@ -782,6 +782,31 @@ async function syncAllData() {
   }
 }
 
+
+/** แปลงค่าเวลาจาก Sheet → HH:mm (กันเคส Date epoch แสดงเป็น 30/12) */
+function formatTime(val, fallback) {
+  fallback = fallback || '08:00';
+  if (val === undefined || val === null || val === '') return fallback;
+  let s = String(val).trim();
+  // รูปแบบ HH:mm หรือ H:mm
+  const m1 = s.match(/^(\d{1,2}):(\d{2})/);
+  if (m1) return String(m1[1]).padStart(2,'0') + ':' + m1[2];
+  // ISO / Date string มีเวลา
+  const m2 = s.match(/T(\d{2}):(\d{2})/);
+  if (m2) return m2[1] + ':' + m2[2];
+  // ถ้าเป็นวันที่ (มี /) หรือ 30/12 → ใช้ fallback
+  if (/\d{1,2}\/\d{1,2}/.test(s) || /1899|1900/.test(s)) return fallback;
+  // ตัวเลขทศนิยมเศษวันจาก Sheets (0.333 = 8:00)
+  const n = Number(s);
+  if (!isNaN(n) && n >= 0 && n < 1.5) {
+    const mins = Math.round(n * 24 * 60);
+    const hh = String(Math.floor(mins/60) % 24).padStart(2,'0');
+    const mm = String(mins % 60).padStart(2,'0');
+    return hh + ':' + mm;
+  }
+  return fallback;
+}
+
 function pick(row, keys, def='') {
   for (const k of keys) {
     if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return row[k];
@@ -801,8 +826,8 @@ function normalizeList(arr, type) {
       o.purpose = pick(row,['purpose','Purpose']);
       o.start_date = toLocalDDMMYYYY(pick(row,['start_date','DepartureDate','StartDate','วันออก']));
       o.end_date = toLocalDDMMYYYY(pick(row,['end_date','ReturnDate','EndDate','วันกลับ']));
-      o.start_time = pick(row,['start_time','StartTime'],'08:00');
-      o.end_time = pick(row,['end_time','EndTime'],'17:00');
+      o.start_time = formatTime(pick(row,['start_time','StartTime'],'08:00'), '08:00');
+      o.end_time = formatTime(pick(row,['end_time','EndTime'],'17:00'), '17:00');
       o.status = pick(row,['status','Status'],'รออนุมัติ');
       o.driver_name = pick(row,['driver_name','DriverName']);
       o.driver_id = pick(row,['driver_id','DriverID']);
@@ -1097,8 +1122,8 @@ function renderDashboard() {
     const last = related[0];
     let lastHtml = '<span style="color:var(--text-secondary);font-size:12px">— ยังไม่มีประวัติก่อนวันนี้</span>';
     if (last) {
-      const t0 = (last.start_time||last.StartTime||'08:00').toString().substring(0,5);
-      const t1 = (last.end_time||last.EndTime||'17:00').toString().substring(0,5);
+      const t0 = formatTime(last.start_time||last.StartTime, '08:00');
+      const t1 = formatTime(last.end_time||last.EndTime, '17:00');
       lastHtml = `<div style="font-size:12px;line-height:1.55">
         <div><strong>📅 ${last.start_date||'-'}</strong> · 🕐 ${t0}–${t1}</div>
         <div>👤 ${last.requester||last.Requester||'-'}</div>
@@ -1357,6 +1382,7 @@ function totalMileage(docId, title) {
   showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>เลขไมล์ปัจจุบัน</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p style="margin-top:10px;font-weight:700">รวมระยะทางในระบบ: ${sum.toLocaleString()} กม.</p>`);
 }
+
 function fuelEfficiency(docId, title) {
   const std = 12;
   const rows = state.vehicles.map(v => {
@@ -1419,6 +1445,7 @@ function taxInsurance(docId, title) {
   showReport(docId, title, `<p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">กรอกวันหมดอายุภาษี/ประกันในข้อมูลรถ เพื่อติดตามในรายงานนี้</p>
     <div class="table-wrap"><table><thead><tr><th>ทะเบียน</th><th>รุ่น</th><th>ภาษี</th><th>ประกันภัย</th><th>พ.ร.บ.</th><th>สถานะรถ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
+
 function driverWorkload(docId, title) {
   const rows = state.drivers.map(d => {
     const jobs = state.bookings.filter(b => b.driver_id === d.driver_id || b.driver_name === d.name);
@@ -1522,6 +1549,7 @@ function exportReportPDF() {
   toast('เลือก "Save as PDF" ในหน้าต่างพิมพ์');
   setTimeout(() => window.print(), 300);
 }
+
 
 
 /** รายการที่วันกลับ (หรือวันออก) เลยวันนี้แล้ว → ไม่แสดงในปฏิทิน */
