@@ -783,26 +783,45 @@ async function syncAllData() {
 }
 
 
-/** แปลงค่าเวลาจาก Sheet → HH:mm (กันเคส Date epoch แสดงเป็น 30/12) */
+/** แปลงค่าเวลาจาก Sheet → HH:mm (รองรับ 9:00, 09:00, Date, เศษวัน) */
 function formatTime(val, fallback) {
-  fallback = fallback || '08:00';
+  if (fallback === undefined) fallback = '08:00';
   if (val === undefined || val === null || val === '') return fallback;
   let s = String(val).trim();
-  // รูปแบบ HH:mm หรือ H:mm
-  const m1 = s.match(/^(\d{1,2}):(\d{2})/);
-  if (m1) return String(m1[1]).padStart(2,'0') + ':' + m1[2];
-  // ISO / Date string มีเวลา
+  // HH:mm / H:mm / H:mm:ss
+  let m1 = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?/);
+  if (m1) return String(+m1[1]).padStart(2,'0') + ':' + m1[2];
+  // มีข้อความปน เช่น "9:00 AM"
+  m1 = s.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (m1) {
+    let h = +m1[1];
+    if (/PM/i.test(m1[3]||'') && h < 12) h += 12;
+    if (/AM/i.test(m1[3]||'') && h === 12) h = 0;
+    return String(h).padStart(2,'0') + ':' + m1[2];
+  }
   const m2 = s.match(/T(\d{2}):(\d{2})/);
   if (m2) return m2[1] + ':' + m2[2];
-  // ถ้าเป็นวันที่ (มี /) หรือ 30/12 → ใช้ fallback
+  // วันที่หลุด (30/12) → fallback
   if (/\d{1,2}\/\d{1,2}/.test(s) || /1899|1900/.test(s)) return fallback;
-  // ตัวเลขทศนิยมเศษวันจาก Sheets (0.333 = 8:00)
   const n = Number(s);
   if (!isNaN(n) && n >= 0 && n < 1.5) {
     const mins = Math.round(n * 24 * 60);
-    const hh = String(Math.floor(mins/60) % 24).padStart(2,'0');
-    const mm = String(mins % 60).padStart(2,'0');
-    return hh + ':' + mm;
+    return String(Math.floor(mins/60) % 24).padStart(2,'0') + ':' + String(mins % 60).padStart(2,'0');
+  }
+  return fallback;
+}
+
+function pickTime(row, keys, fallback) {
+  fallback = (fallback === undefined || fallback === null) ? '08:00' : fallback;
+  for (const k of keys) {
+    if (row[k] === undefined || row[k] === null) continue;
+    const raw = String(row[k]).trim();
+    if (!raw) continue;
+    // ข้ามค่าที่เป็นวันที่หลุดจาก Sheets
+    if (/^\d{1,2}\/\d{1,2}/.test(raw) && !raw.includes(':')) continue;
+    if (/1899|1900/.test(raw)) continue;
+    const t = formatTime(raw, '');
+    if (t && /^\d{2}:\d{2}$/.test(t)) return t;
   }
   return fallback;
 }
@@ -826,8 +845,8 @@ function normalizeList(arr, type) {
       o.purpose = pick(row,['purpose','Purpose']);
       o.start_date = toLocalDDMMYYYY(pick(row,['start_date','DepartureDate','StartDate','วันออก']));
       o.end_date = toLocalDDMMYYYY(pick(row,['end_date','ReturnDate','EndDate','วันกลับ']));
-      o.start_time = formatTime(pick(row,['start_time','StartTime'],'08:00'), '08:00');
-      o.end_time = formatTime(pick(row,['end_time','EndTime'],'17:00'), '17:00');
+      o.start_time = pickTime(row, ['start_time','StartTime','Start Time','เวลาออก'], '08:00');
+      o.end_time = pickTime(row, ['end_time','EndTime','End Time','เวลากลับ'], '17:00');
       o.status = pick(row,['status','Status'],'รออนุมัติ');
       o.driver_name = pick(row,['driver_name','DriverName']);
       o.driver_id = pick(row,['driver_id','DriverID']);
@@ -1122,8 +1141,8 @@ function renderDashboard() {
     const last = related[0];
     let lastHtml = '<span style="color:var(--text-secondary);font-size:12px">— ยังไม่มีประวัติก่อนวันนี้</span>';
     if (last) {
-      const t0 = formatTime(last.start_time||last.StartTime, '08:00');
-      const t1 = formatTime(last.end_time||last.EndTime, '17:00');
+      const t0 = pickTime(last, ['start_time','StartTime','Start Time','เวลาออก'], '08:00');
+      const t1 = pickTime(last, ['end_time','EndTime','End Time','เวลากลับ'], '17:00');
       lastHtml = `<div style="font-size:12px;line-height:1.55">
         <div><strong>📅 ${last.start_date||'-'}</strong> · 🕐 ${t0}–${t1}</div>
         <div>👤 ${last.requester||last.Requester||'-'}</div>
@@ -1317,7 +1336,6 @@ function generateReport(fn, docId) {
   if (map[fn]) map[fn](docId, title);
   else toast('ยังไม่รองรับรายงานนี้','error');
 }
-
 function vehicleUtilization(docId, title) {
   const daysInMonth = 30;
   const rows = state.vehicles.map(v => {
@@ -1464,7 +1482,6 @@ function driverRating(docId, title) {
   }).join('') || '<tr><td colspan="6">ไม่มีข้อมูล</td></tr>';
   showReport(docId, title, `<div class="table-wrap"><table><thead><tr><th>คนขับ</th><th>คะแนน</th><th>เรตติ้ง</th><th>ใบขับขี่</th><th>หมดอายุ</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table></div>`);
 }
-
 function printActiveReport() {
   const card = document.getElementById('reportOutputCard');
   if (!card || card.style.display === 'none') { toast('กรุณาเลือกรายงานก่อน','error'); return; }
