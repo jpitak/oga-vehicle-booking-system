@@ -107,6 +107,29 @@ function resolveSheet_(ss, preferredName) {
   return null;
 }
 
+function isTimeHeader_(h) {
+  return /time|เวลา/i.test(String(h || ''));
+}
+
+function formatCellValue_(val, header) {
+  if (val instanceof Date) {
+    // Time-only cells in Sheets often use epoch date 1899-12-30
+    var y = val.getFullYear();
+    if (isTimeHeader_(header) || y < 1950) {
+      return Utilities.formatDate(val, TIMEZONE, 'HH:mm');
+    }
+    return Utilities.formatDate(val, TIMEZONE, 'dd/MM/yyyy');
+  }
+  if (typeof val === 'string') {
+    val = val.replace(/^'/, '');
+    // ถ้าหัวคอลัมน์เป็นเวลา แต่ค่าเป็นวันที่หลุดมา (เช่น 30/12/1899) → default
+    if (isTimeHeader_(header) && /\d{1,2}\/\d{1,2}/.test(val) && !/^\d{1,2}:\d{2}/.test(val)) {
+      return '08:00';
+    }
+  }
+  return val;
+}
+
 function getSheetData(ss, sheetName) {
   var sheet = resolveSheet_(ss, sheetName);
   if (!sheet) return [];
@@ -118,12 +141,7 @@ function getSheetData(ss, sheetName) {
     var obj = {};
     var empty = true;
     for (var j = 0; j < headers.length; j++) {
-      var val = values[i][j];
-      if (val instanceof Date) {
-        val = Utilities.formatDate(val, TIMEZONE, 'dd/MM/yyyy');
-      } else if (typeof val === 'string') {
-        val = val.replace(/^'/, '');
-      }
+      var val = formatCellValue_(values[i][j], headers[j]);
       obj[headers[j]] = val;
       if (val !== '' && val !== null && val !== undefined) empty = false;
     }
@@ -293,7 +311,6 @@ function doPost(e) {
         timestamp: Utilities.formatDate(new Date(), TIMEZONE, 'dd/MM/yyyy HH:mm:ss')
       });
     }
-
     if (action === 'SAVE_BOOKING' || action === 'saveBooking') {
       // บังคับล้าง ID ทุกรูปแบบเพื่อสร้างแถวใหม่เสมอ (แก้ปัญหาบันทึกทับบรรทัดเดิม)
       if (payload) {
@@ -314,7 +331,6 @@ function doPost(e) {
     if (action === 'DELETE_BOOKING' || action === 'deleteBooking') {
       return jsonResponse(deleteRow_(ss, SHEET_NAMES.BOOKINGS, payload.id || payload.ID || payload.booking_id, 'ID'));
     }
-
     if (action === 'APPROVE_BOOKING' || action === 'approveBooking') {
       payload.Status = (payload.approve === false || payload.approve === 'false') ? 'ไม่อนุมัติ' : 'อนุมัติแล้ว';
       payload.ApprovedDate = forceDateValue_(new Date());
@@ -437,6 +453,7 @@ function saveRow_(ss, sheetName, data, idField, headers, altIdField, forceInsert
       }
     }
   }
+
   var row = hdrs.map(function (h) {
     return (normalized[h] !== undefined && normalized[h] !== null) ? normalized[h] : '';
   });
