@@ -108,24 +108,40 @@ function resolveSheet_(ss, preferredName) {
 }
 
 function isTimeHeader_(h) {
-  return /time|เวลา/i.test(String(h || ''));
+  return /^(starttime|endtime|start_time|end_time|time|เวลา)/i.test(String(h || '').replace(/\s/g, ''));
 }
 
-function formatCellValue_(val, header) {
-  if (val instanceof Date) {
-    // Time-only cells in Sheets often use epoch date 1899-12-30
-    var y = val.getFullYear();
-    if (isTimeHeader_(header) || y < 1950) {
+function isDateHeader_(h) {
+  return /date|expire|due|วัน/i.test(String(h || ''));
+}
+
+/** อ่านค่าเซลล์ — เวลาใช้ข้อความที่แสดงในชีต (9:00) ไม่ใช้ Date object */
+function formatCellValue_(val, header, displayVal) {
+  var h = String(header || '');
+  // ใช้ display text สำหรับคอลัมน์เวลาเสมอ
+  if (isTimeHeader_(h)) {
+    var ds = (displayVal !== undefined && displayVal !== null) ? String(displayVal).trim() : '';
+    if (ds && /^\d{1,2}:\d{2}/.test(ds)) {
+      var parts = ds.match(/^(\d{1,2}):(\d{2})/);
+      return ('0' + parts[1]).slice(-2) + ':' + parts[2];
+    }
+    if (val instanceof Date) {
       return Utilities.formatDate(val, TIMEZONE, 'HH:mm');
     }
-    return Utilities.formatDate(val, TIMEZONE, 'dd/MM/yyyy');
+    if (typeof val === 'number' && val >= 0 && val < 2) {
+      var mins = Math.round(val * 24 * 60);
+      return ('0' + (Math.floor(mins / 60) % 24)).slice(-2) + ':' + ('0' + (mins % 60)).slice(-2);
+    }
+    return '08:00';
+  }
+  if (val instanceof Date) {
+    if (isDateHeader_(h) || val.getFullYear() >= 1950) {
+      return Utilities.formatDate(val, TIMEZONE, 'dd/MM/yyyy');
+    }
+    return Utilities.formatDate(val, TIMEZONE, 'HH:mm');
   }
   if (typeof val === 'string') {
-    val = val.replace(/^'/, '');
-    // ถ้าหัวคอลัมน์เป็นเวลา แต่ค่าเป็นวันที่หลุดมา (เช่น 30/12/1899) → default
-    if (isTimeHeader_(header) && /\d{1,2}\/\d{1,2}/.test(val) && !/^\d{1,2}:\d{2}/.test(val)) {
-      return '08:00';
-    }
+    return val.replace(/^'/, '');
   }
   return val;
 }
@@ -133,7 +149,9 @@ function formatCellValue_(val, header) {
 function getSheetData(ss, sheetName) {
   var sheet = resolveSheet_(ss, sheetName);
   if (!sheet) return [];
-  var values = sheet.getDataRange().getValues();
+  var range = sheet.getDataRange();
+  var values = range.getValues();
+  var displays = range.getDisplayValues();
   if (values.length < 2) return [];
   var headers = values[0].map(function (h) { return String(h).trim(); });
   var rows = [];
@@ -141,7 +159,7 @@ function getSheetData(ss, sheetName) {
     var obj = {};
     var empty = true;
     for (var j = 0; j < headers.length; j++) {
-      var val = formatCellValue_(values[i][j], headers[j]);
+      var val = formatCellValue_(values[i][j], headers[j], displays[i][j]);
       obj[headers[j]] = val;
       if (val !== '' && val !== null && val !== undefined) empty = false;
     }
@@ -311,6 +329,7 @@ function doPost(e) {
         timestamp: Utilities.formatDate(new Date(), TIMEZONE, 'dd/MM/yyyy HH:mm:ss')
       });
     }
+
     if (action === 'SAVE_BOOKING' || action === 'saveBooking') {
       // บังคับล้าง ID ทุกรูปแบบเพื่อสร้างแถวใหม่เสมอ (แก้ปัญหาบันทึกทับบรรทัดเดิม)
       if (payload) {
@@ -331,6 +350,7 @@ function doPost(e) {
     if (action === 'DELETE_BOOKING' || action === 'deleteBooking') {
       return jsonResponse(deleteRow_(ss, SHEET_NAMES.BOOKINGS, payload.id || payload.ID || payload.booking_id, 'ID'));
     }
+
     if (action === 'APPROVE_BOOKING' || action === 'approveBooking') {
       payload.Status = (payload.approve === false || payload.approve === 'false') ? 'ไม่อนุมัติ' : 'อนุมัติแล้ว';
       payload.ApprovedDate = forceDateValue_(new Date());
@@ -438,7 +458,6 @@ function saveRow_(ss, sheetName, data, idField, headers, altIdField, forceInsert
     var altCol = altIdField ? hdrs.indexOf(altIdField) : -1;
     var idStr = String(id).trim();
     var altStr = (altIdField && normalized[altIdField]) ? String(normalized[altIdField]).trim() : '';
-
     for (var i = 1; i < values.length; i++) {
       var match = false;
       if (idCol >= 0 && idStr !== '') {
